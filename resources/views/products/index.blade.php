@@ -89,7 +89,7 @@
                     <td colspan="8">
                         <div class="empty-state">
                             <i class="bi bi-hourglass-split"></i>
-                            Memuat data dari Firebase…
+                            Memuat data…
                         </div>
                     </td>
                 </tr>
@@ -108,7 +108,7 @@
                 </div>
                 <h5 style="font-weight:700;margin-bottom:.4rem">Hapus Produk?</h5>
                 <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1.25rem">
-                    Data produk akan dihapus permanen dari Firebase.
+                    Data produk akan dihapus permanen.
                 </p>
                 <div class="d-flex gap-2 justify-content-center">
                     <button class="btn-primary-custom" data-bs-dismiss="modal">Batal</button>

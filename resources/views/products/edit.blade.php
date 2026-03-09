@@ -34,7 +34,7 @@
                 <!-- Loading state -->
                 <div id="formLoading" style="text-align:center;padding:2rem;color:var(--text-muted)">
                     <div class="spinner" style="margin:0 auto .75rem;border-top-color:var(--primary);border-color:var(--border);border-top-color:var(--primary)"></div>
-                    Memuat data dari Firebase…
+                    Memuat data…
                 </div>
 
                 <form id="editForm" style="display:none">
@@ -129,7 +129,7 @@
                     <div style="display:flex;gap:.75rem;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border);flex-wrap:wrap">
                         <button type="submit" class="btn-primary-custom" id="updateBtn">
                             <i class="bi bi-cloud-check-fill"></i>
-                            Update di Firebase
+                            Update
                         </button>
                         <a href="{{ route('products.index') }}" class="btn-primary-custom"
                            style="background:#f1f5f9;color:var(--text-main)">
@@ -176,7 +176,7 @@
             document.getElementById('editForm').style.display    = 'block';
 
         } catch (e) {
-            showAlert('danger', '<i class="bi bi-wifi-off"></i> Gagal terhubung ke Firebase.');
+            showAlert('danger', '<i class="bi bi-wifi-off"></i> Gagal terhubung.');
         }
     }
 
@@ -209,14 +209,14 @@
             if (!res.ok) throw new Error();
 
             hideLoading();
-            showAlert('success', `<i class="bi bi-check-circle-fill"></i> Produk berhasil diperbarui di Firebase!`);
+            showAlert('success', `<i class="bi bi-check-circle-fill"></i> Produk berhasil diperbarui!`);
 
         } catch (err) {
             hideLoading();
             showAlert('danger', '<i class="bi bi-exclamation-circle-fill"></i> Gagal memperbarui data.');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-cloud-check-fill"></i> Update di Firebase';
+            btn.innerHTML = '<i class="bi bi-cloud-check-fill"></i> Update';
         }
     });
 

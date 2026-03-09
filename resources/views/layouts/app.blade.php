@@ -498,28 +498,10 @@
             <span>Pengaturan</span>
         </a>
     </nav>
-
-    <div class="sidebar-footer">
-        <div style="font-weight:600;color:rgba(255,255,255,.5);margin-bottom:.2rem">Firebase RTDB</div>
-        <div>Tugas BaaS — Ciputra University</div>
-    </div>
 </aside>
 
 <!-- Main Wrapper -->
 <div class="main-wrap">
-    <!-- Topbar -->
-    <header class="topbar">
-        <div class="d-flex align-items-center gap-3">
-            <button class="btn-icon btn-edit d-md-none" id="sidebarToggle">
-                <i class="bi bi-list"></i>
-            </button>
-            <span class="topbar-title">@yield('page-title', 'Dashboard')</span>
-        </div>
-        <div class="topbar-badge">
-            <i class="bi bi-fire" style="color:#f97316"></i>
-            Firebase Connected
-        </div>
-    </header>
 
     <!-- Page Content -->
     <main class="page-content">

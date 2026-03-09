@@ -202,11 +202,3 @@ inventrack/
 | JavaScript Fetch API | - | CRUD ke Firebase REST API |
 | Google Fonts | - | Typography (Plus Jakarta Sans) |
 
----
-
-## 👤 Informasi Tugas
-
-- **Mata Kuliah**: Backend as a Service (BaaS)
-- **Platform BaaS**: Firebase Realtime Database
-- **Tema Aplikasi**: Manajemen Inventaris Toko
-- **Universitas**: Ciputra University

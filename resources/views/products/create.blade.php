@@ -21,7 +21,7 @@
                     <i class="bi bi-plus-circle-fill me-2" style="color:var(--accent)"></i>
                     Form Tambah Produk
                 </h2>
-                <span style="font-size:.75rem;color:var(--text-muted)">Disimpan ke Firebase RTDB</span>
+                <span style="font-size:.75rem;color:var(--text-muted)">Disimpan</span>
             </div>
 
             <div style="padding:1.5rem">
@@ -126,7 +126,7 @@
                     <div style="display:flex;gap:.75rem;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border)">
                         <button type="submit" class="btn-accent" id="submitBtn">
                             <i class="bi bi-cloud-upload-fill"></i>
-                            Simpan ke Firebase
+                            Simpan
                         </button>
                         <a href="{{ route('products.index') }}" class="btn-primary-custom"
                            style="background:#f1f5f9;color:var(--text-main)">
@@ -139,18 +139,6 @@
             </div>
         </div>
 
-        <!-- Firebase info card -->
-        <div class="card mt-3" style="border-color:#bfdbfe;background:#eff6ff">
-            <div style="padding:1rem 1.25rem;display:flex;align-items:center;gap:.75rem">
-                <i class="bi bi-info-circle-fill" style="color:#2563eb;font-size:1.1rem;flex-shrink:0"></i>
-                <div style="font-size:.8rem;color:#1e40af">
-                    <strong>Firebase Realtime Database</strong> — Data disimpan secara real-time ke node
-                    <code style="background:#dbeafe;padding:.1rem .3rem;border-radius:4px">/products/{id}</code>
-                    menggunakan metode <code style="background:#dbeafe;padding:.1rem .3rem;border-radius:4px">POST</code>.
-                    Setiap produk memiliki 6 field: nama_produk, kategori, harga, stok, supplier, keterangan.
-                </div>
-            </div>
-        </div>
 
     </div>
 </div>
@@ -189,7 +177,7 @@
             if (!res.ok) throw new Error('Firebase error');
 
             hideLoading();
-            showAlert('success', `<i class="bi bi-check-circle-fill"></i> Produk "<strong>${payload.nama_produk}</strong>" berhasil disimpan ke Firebase!`);
+            showAlert('success', `<i class="bi bi-check-circle-fill"></i> Produk "<strong>${payload.nama_produk}</strong>" berhasil disimpan!`);
             this.reset();
 
         } catch (err) {
@@ -197,7 +185,7 @@
             showAlert('danger', '<i class="bi bi-exclamation-circle-fill"></i> Gagal menyimpan data. Periksa koneksi Firebase.');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-cloud-upload-fill"></i> Simpan ke Firebase';
+            btn.innerHTML = '<i class="bi bi-cloud-upload-fill"></i> Simpan';
         }
     });
 
