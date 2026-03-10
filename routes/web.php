@@ -14,16 +14,19 @@ use App\Http\Controllers\ProductController;
 |
 */
 
-// Dashboard / Daftar Produk
+// Redirect root → dashboard
 Route::get('/', function () {
     return redirect()->route('products.index');
 });
 
-// READ   - Daftar semua produk
+// READ   — Daftar semua produk
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
-// CREATE - Form tambah produk baru
+// CREATE — Form tambah produk baru
 Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
 
-// EDIT   - Form edit produk berdasarkan Firebase key
+// VIEW   — Detail satu produk (harus sebelum {id}/edit agar "create" tidak tertangkap sebagai {id})
+Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
+
+// UPDATE — Form edit produk berdasarkan Firebase key
 Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
