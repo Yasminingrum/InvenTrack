@@ -3,12 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AuthController;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes — InvenTrack (Firebase BaaS + Firebase Auth)
-|--------------------------------------------------------------------------
-*/
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ReportController;
 
 // ── Root redirect ──
 Route::get('/', function () {
@@ -16,32 +12,41 @@ Route::get('/', function () {
 });
 
 // ══════════════════════════════════════════════
-// AUTH ROUTES (Guest only — sudah login redirect)
+// AUTH ROUTES (Guest only)
 // ══════════════════════════════════════════════
 Route::middleware('guest.firebase')->group(function () {
     Route::get('/login',    [AuthController::class, 'loginPage'])->name('login');
     Route::get('/register', [AuthController::class, 'registerPage'])->name('register');
 });
 
-// Endpoint AJAX untuk menyimpan session setelah Firebase Auth
 Route::post('/auth/session', [AuthController::class, 'storeSession'])->name('auth.session');
-
-// Logout
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout',       [AuthController::class, 'logout'])->name('logout');
 
 // ══════════════════════════════════════════════
-// PROTECTED ROUTES (Wajib login)
+// PROTECTED ROUTES
 // ══════════════════════════════════════════════
 Route::middleware('auth.firebase')->group(function () {
-    // READ   — Daftar semua produk
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 
-    // CREATE — Form tambah produk baru
-    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    // ── Semua role: Dashboard & Laporan ──
+    Route::get('/products',        [ProductController::class, 'index'])->name('products.index');
+    Route::get('/reports',         [ReportController::class,  'index'])->name('reports.index');
 
-    // VIEW   — Detail satu produk
+    // ── Admin & Superadmin: CRUD ──
+    // ⚠️ PENTING: /products/create HARUS sebelum /products/{id}
+    //    agar Laravel tidak salah tangkap "create" sebagai {id}
+    Route::middleware('role:admin,superadmin')->group(function () {
+        Route::get('/products/create',    [ProductController::class, 'create'])->name('products.create');
+        Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    });
+
+    // ── Semua role: detail produk (setelah create agar tidak bentrok) ──
     Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 
-    // UPDATE — Form edit produk
-    Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    // ── Superadmin: Pengaturan ──
+    Route::middleware('role:superadmin')->group(function () {
+        Route::get('/settings',       [SettingsController::class, 'index'])->name('settings.index');
+        Route::get('/settings/users', [SettingsController::class, 'users'])->name('settings.users');
+        Route::post('/settings/users/{uid}/role', [SettingsController::class, 'updateRole'])->name('settings.users.role');
+    });
+
 });

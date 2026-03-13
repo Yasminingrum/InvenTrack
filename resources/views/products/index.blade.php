@@ -4,6 +4,11 @@
 
 @section('content')
 
+@php
+    $role    = session('firebase_role', 'viewer');
+    $canEdit = in_array($role, ['admin', 'superadmin']);
+@endphp
+
 <!-- Stat Cards -->
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-xl-3">
@@ -55,11 +60,23 @@
             <input type="text" class="form-control-custom" id="searchInput"
                    placeholder="&#xF52A; Cari produk..."
                    style="width:200px;font-family:'Plus Jakarta Sans',sans-serif">
+
+            {{-- Tombol Tambah hanya untuk admin & superadmin --}}
+            @if($canEdit)
             <a href="{{ route('products.create') }}" class="btn-accent">
                 <i class="bi bi-plus-lg"></i> Tambah
             </a>
+            @endif
         </div>
     </div>
+
+    {{-- Viewer: tampilkan info badge read-only --}}
+    @if(!$canEdit)
+    <div style="padding:.6rem 1.5rem;background:#eff6ff;border-bottom:1px solid #bfdbfe;font-size:.78rem;color:#1e40af;display:flex;align-items:center;gap:.5rem">
+        <i class="bi bi-eye-fill"></i>
+        Anda login sebagai <strong>viewer</strong> — hanya dapat melihat data.
+    </div>
+    @endif
 
     <div style="overflow-x:auto">
         <table class="table-custom">
@@ -72,6 +89,7 @@
                     <th>Stok</th>
                     <th>Supplier</th>
                     <th>Keterangan</th>
+                    {{-- Kolom Aksi: tampil berbeda berdasarkan role --}}
                     <th style="text-align:center">Aksi</th>
                 </tr>
             </thead>
@@ -86,7 +104,8 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
+{{-- Modal Hapus: hanya render untuk admin & superadmin --}}
+@if($canEdit)
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content" style="border-radius:12px;border:none;box-shadow:0 20px 60px rgba(0,0,0,.15)">
@@ -110,17 +129,14 @@
         </div>
     </div>
 </div>
+@endif
 
 @endsection
 
 @push('scripts')
 <script>
     const FIREBASE_URL = "{{ env('FIREBASE_DATABASE_URL') }}";
-
-    async function fetchProducts() {
-        const res = await fetch(`${FIREBASE_URL}/products.json`);
-        return await res.json();
-    }
+    const CAN_EDIT     = {{ $canEdit ? 'true' : 'false' }};   // ← role check ke JS
 
     function stockBadge(qty) {
         const q = parseInt(qty) || 0;
@@ -134,7 +150,6 @@
         return new Intl.NumberFormat('id-ID').format(n);
     }
 
-    // Compact format agar tidak overflow stat card
     function compactRupiah(n) {
         if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1).replace('.0','') + ' M';
         if (n >= 1_000_000)     return (n / 1_000_000).toFixed(1).replace('.0','') + ' Jt';
@@ -146,14 +161,15 @@
     async function loadProducts() {
         const tbody = document.getElementById('productTableBody');
         try {
-            const data = await fetchProducts();
+            const res  = await fetch(`${FIREBASE_URL}/products.json`);
+            const data = await res.json();
 
             if (!data) {
                 tbody.innerHTML = `<tr><td colspan="8">
                     <div class="empty-state">
                         <i class="bi bi-inbox"></i>
                         <div style="font-weight:600;margin-bottom:.25rem">Belum ada produk</div>
-                        <div style="font-size:.8rem">Klik "Tambah" untuk menambah produk baru</div>
+                        ${CAN_EDIT ? '<div style="font-size:.8rem">Klik "Tambah" untuk menambah produk baru</div>' : ''}
                     </div>
                 </td></tr>`;
                 updateStats([]);
@@ -199,9 +215,12 @@
                 </td>
                 <td>
                     <div class="d-flex gap-1 justify-content-center">
+                        {{-- Tombol Lihat: semua role --}}
                         <a href="/products/${p.id}" class="btn-icon" style="background:#f0fdf4;color:#16a34a" title="Lihat detail">
                             <i class="bi bi-eye-fill"></i>
                         </a>
+                        ${CAN_EDIT ? `
+                        {{-- Tombol Edit & Hapus: admin & superadmin saja --}}
                         <a href="/products/${p.id}/edit" class="btn-icon btn-edit" title="Edit produk">
                             <i class="bi bi-pencil-fill"></i>
                         </a>
@@ -209,6 +228,7 @@
                                 onclick="openDeleteModal('${p.id}', '${escHtml(p.nama_produk)}')">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
+                        ` : ''}
                     </div>
                 </td>
             </tr>
@@ -217,15 +237,10 @@
 
     function updateStats(products) {
         document.getElementById('statTotal').textContent = products.length;
-
         const totalVal = products.reduce((s, p) => s + (parseInt(p.harga)||0) * (parseInt(p.stok)||0), 0);
         document.getElementById('statValue').textContent = compactRupiah(totalVal);
-
-        document.getElementById('statLow').textContent =
-            products.filter(p => (parseInt(p.stok)||0) <= 10).length;
-
-        document.getElementById('statCats').textContent =
-            new Set(products.map(p => p.kategori)).size;
+        document.getElementById('statLow').textContent   = products.filter(p => (parseInt(p.stok)||0) <= 10).length;
+        document.getElementById('statCats').textContent  = new Set(products.map(p => p.kategori)).size;
     }
 
     // Search
@@ -238,7 +253,8 @@
         ));
     });
 
-    // Delete
+    // Delete — hanya inisialisasi jika CAN_EDIT
+    @if($canEdit)
     let pendingDeleteId   = null;
     let pendingDeleteName = '';
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
@@ -269,6 +285,7 @@
             pendingDeleteName = '';
         }
     });
+    @endif
 
     function escHtml(s) {
         if (!s) return '';

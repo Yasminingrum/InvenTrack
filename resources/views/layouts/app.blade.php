@@ -30,9 +30,7 @@
         * { box-sizing: border-box; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--surface); color: var(--text-main); min-height: 100vh; }
 
-        /* ══════════════════════════════════
-           SIDEBAR
-        ══════════════════════════════════ */
+        /* ══ SIDEBAR ══ */
         .sidebar {
             position: fixed; top: 0; left: 0;
             width: var(--sidebar-w); height: 100vh;
@@ -56,111 +54,54 @@
         body.sidebar-collapsed .toggle-btn i     { transform: rotate(180deg); }
         body.sidebar-collapsed .user-panel       { justify-content: center; padding: .6rem 0; }
         body.sidebar-collapsed .user-avatar      { margin: 0; }
+        body.sidebar-collapsed .btn-logout       { justify-content: center; padding: .6rem 0; }
+        body.sidebar-collapsed .btn-logout span  { opacity: 0; width: 0; pointer-events: none; overflow: hidden; }
 
         /* Brand */
-        .sidebar-brand {
-            padding: 1rem 1rem .85rem;
-            border-bottom: 1px solid rgba(255,255,255,.1);
-            display: flex; align-items: center; justify-content: space-between; gap: .5rem;
-            flex-shrink: 0;
-        }
+        .sidebar-brand { padding: 1rem 1rem .85rem; border-bottom: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-shrink: 0; }
         .brand-logo  { display: flex; align-items: center; gap: .75rem; text-decoration: none; min-width: 0; }
         .brand-icon  { width: 38px; height: 38px; background: var(--accent); border-radius: 10px; display: grid; place-items: center; font-size: 1.15rem; color: #fff; flex-shrink: 0; }
         .brand-text  { font-size: 1.05rem; font-weight: 800; color: #fff; letter-spacing: -.3px; line-height: 1.1; white-space: nowrap; transition: opacity var(--transition), width var(--transition); }
         .brand-sub   { font-size: .6rem; font-weight: 500; color: rgba(255,255,255,.45); letter-spacing: .5px; text-transform: uppercase; white-space: nowrap; transition: opacity var(--transition), width var(--transition); }
-
-        .toggle-btn {
-            width: 28px; height: 28px; flex-shrink: 0;
-            background: rgba(255,255,255,.12); border: none; border-radius: 7px;
-            display: grid; place-items: center; cursor: pointer;
-            color: rgba(255,255,255,.8); font-size: .85rem; transition: background .15s;
-        }
+        .toggle-btn  { width: 28px; height: 28px; flex-shrink: 0; background: rgba(255,255,255,.12); border: none; border-radius: 7px; display: grid; place-items: center; cursor: pointer; color: rgba(255,255,255,.8); font-size: .85rem; transition: background .15s; }
         .toggle-btn:hover { background: rgba(255,255,255,.22); color: #fff; }
         .toggle-btn i { transition: transform var(--transition); }
 
+        /* Role Badge in Sidebar */
+        .role-badge { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .5rem; border-radius: 20px; font-size: .6rem; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; }
+        .role-superadmin { background: rgba(249,115,22,.25); color: #fb923c; }
+        .role-admin      { background: rgba(34,197,94,.2);  color: #4ade80; }
+        .role-viewer     { background: rgba(255,255,255,.12); color: rgba(255,255,255,.6); }
+
         /* User Panel */
-        .user-panel {
-            display: flex; align-items: center; gap: .65rem;
-            padding: .85rem 1rem;
-            border-bottom: 1px solid rgba(255,255,255,.1);
-            flex-shrink: 0; overflow: hidden;
-            transition: padding var(--transition), justify-content var(--transition);
-        }
-        .user-avatar {
-            width: 36px; height: 36px; flex-shrink: 0;
-            background: var(--accent); border-radius: 50%;
-            display: grid; place-items: center;
-            font-size: .95rem; color: #fff; font-weight: 700;
-            transition: margin var(--transition);
-        }
-        .user-info  { min-width: 0; flex: 1; overflow: hidden; }
-        .user-name  { font-size: .82rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity var(--transition), width var(--transition); }
-        .user-email { font-size: .68rem; color: rgba(255,255,255,.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity var(--transition), width var(--transition); }
+        .user-panel { display: flex; align-items: center; gap: .65rem; padding: .85rem 1rem; border-bottom: 1px solid rgba(255,255,255,.1); flex-shrink: 0; overflow: hidden; transition: padding var(--transition); }
+        .user-avatar { width: 36px; height: 36px; flex-shrink: 0; background: var(--accent); border-radius: 50%; display: grid; place-items: center; font-size: .95rem; color: #fff; font-weight: 700; transition: margin var(--transition); }
+        .user-info   { min-width: 0; flex: 1; overflow: hidden; }
+        .user-name   { font-size: .82rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity var(--transition), width var(--transition); }
+        .user-email  { font-size: .68rem; color: rgba(255,255,255,.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity var(--transition), width var(--transition); }
 
         /* Nav */
         .sidebar-nav { padding: .85rem .6rem; flex: 1; overflow-y: auto; overflow-x: hidden; }
-        .nav-section-label {
-            font-size: .6rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
-            color: rgba(255,255,255,.3); padding: .5rem .6rem .2rem;
-            margin-top: .4rem; white-space: nowrap;
-            transition: opacity var(--transition), width var(--transition);
-        }
-        .sidebar-link {
-            display: flex; align-items: center; gap: .7rem;
-            padding: .58rem .65rem; border-radius: 8px;
-            color: rgba(255,255,255,.72); text-decoration: none;
-            font-size: .875rem; font-weight: 500;
-            transition: background .15s, color .15s, padding var(--transition), justify-content var(--transition);
-            margin-bottom: 2px; white-space: nowrap; overflow: hidden;
-        }
+        .nav-section-label { font-size: .6rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,.3); padding: .5rem .6rem .2rem; margin-top: .4rem; white-space: nowrap; transition: opacity var(--transition), width var(--transition); }
+        .sidebar-link { display: flex; align-items: center; gap: .7rem; padding: .58rem .65rem; border-radius: 8px; color: rgba(255,255,255,.72); text-decoration: none; font-size: .875rem; font-weight: 500; transition: background .15s, color .15s, padding var(--transition), justify-content var(--transition); margin-bottom: 2px; white-space: nowrap; overflow: hidden; }
         .sidebar-link i  { font-size: 1rem; flex-shrink: 0; }
         .sidebar-link span { transition: opacity var(--transition), width var(--transition); }
         .sidebar-link:hover  { background: rgba(255,255,255,.11); color: #fff; }
         .sidebar-link.active { background: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(249,115,22,.3); }
 
-        /* Tooltip */
+        /* Tooltip on collapsed */
         body.sidebar-collapsed .sidebar-link { position: relative; }
-        body.sidebar-collapsed .sidebar-link::after {
-            content: attr(data-label);
-            position: absolute; left: calc(var(--sidebar-mini) - 4px);
-            background: #1e293b; color: #fff; font-size: .78rem; font-weight: 600;
-            padding: .35rem .7rem; border-radius: 7px; white-space: nowrap;
-            pointer-events: none; opacity: 0; transform: translateX(6px);
-            transition: opacity .15s, transform .15s; z-index: 999;
-            box-shadow: 0 4px 12px rgba(0,0,0,.2);
-        }
+        body.sidebar-collapsed .sidebar-link::after { content: attr(data-label); position: absolute; left: calc(var(--sidebar-mini) - 4px); background: #1e293b; color: #fff; font-size: .78rem; font-weight: 600; padding: .35rem .7rem; border-radius: 7px; white-space: nowrap; pointer-events: none; opacity: 0; transform: translateX(6px); transition: opacity .15s, transform .15s; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
         body.sidebar-collapsed .sidebar-link:hover::after { opacity: 1; transform: translateX(10px); }
 
-        /* Logout button in sidebar */
-        .btn-logout {
-            display: flex; align-items: center; gap: .7rem;
-            padding: .58rem .65rem; border-radius: 8px;
-            color: rgba(255,255,255,.6); background: none; border: none;
-            font-size: .875rem; font-weight: 500; font-family: inherit; cursor: pointer;
-            width: 100%; text-align: left;
-            transition: background .15s, color .15s, padding var(--transition), justify-content var(--transition);
-            white-space: nowrap; overflow: hidden;
-        }
+        .btn-logout { display: flex; align-items: center; gap: .7rem; padding: .58rem .65rem; border-radius: 8px; color: rgba(255,255,255,.6); background: none; border: none; font-size: .875rem; font-weight: 500; font-family: inherit; cursor: pointer; width: 100%; text-align: left; transition: background .15s, color .15s, padding var(--transition); white-space: nowrap; overflow: hidden; }
         .btn-logout i   { font-size: 1rem; flex-shrink: 0; }
         .btn-logout span { transition: opacity var(--transition), width var(--transition); }
         .btn-logout:hover { background: rgba(239,68,68,.2); color: #fca5a5; }
-        body.sidebar-collapsed .btn-logout { justify-content: center; padding: .6rem 0; }
-        body.sidebar-collapsed .btn-logout span { opacity: 0; width: 0; pointer-events: none; overflow: hidden; }
+        .sidebar-footer { padding: .75rem 1rem; border-top: 1px solid rgba(255,255,255,.1); font-size: .72rem; color: rgba(255,255,255,.3); white-space: nowrap; transition: opacity var(--transition); flex-shrink: 0; }
 
-        .sidebar-footer {
-            padding: .75rem 1rem; border-top: 1px solid rgba(255,255,255,.1);
-            font-size: .72rem; color: rgba(255,255,255,.3);
-            white-space: nowrap; transition: opacity var(--transition); flex-shrink: 0;
-        }
-
-        /* ══════════════════════════════════
-           MAIN LAYOUT
-        ══════════════════════════════════ */
-        .main-wrap {
-            margin-left: var(--sidebar-w); min-height: 100vh;
-            display: flex; flex-direction: column;
-            transition: margin-left var(--transition);
-        }
+        /* ══ MAIN LAYOUT ══ */
+        .main-wrap { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; transition: margin-left var(--transition); }
         .page-content { padding: 1.75rem 2rem; flex: 1; }
 
         /* Cards */
@@ -184,7 +125,7 @@
         .table-custom tbody td { padding: .875rem 1rem; font-size: .875rem; vertical-align: middle; }
 
         /* Badges */
-        .badge-stock { padding: .25rem .65rem; border-radius: 20px; font-size: .7rem; font-weight: 700; font-family: 'DM Mono', monospace; }
+        .badge-stock  { padding: .25rem .65rem; border-radius: 20px; font-size: .7rem; font-weight: 700; font-family: 'DM Mono', monospace; }
         .badge-high   { background: #dcfce7; color: #15803d; }
         .badge-medium { background: #fef9c3; color: #a16207; }
         .badge-low    { background: #fee2e2; color: #b91c1c; }
@@ -214,7 +155,7 @@
         .alert-success-custom { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
         .alert-danger-custom  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 
-        /* Loading */
+        /* Loading overlay */
         .loading-overlay { position: fixed; inset: 0; background: rgba(15,76,129,.7); z-index: 9999; display: none; place-items: center; color: #fff; font-size: .875rem; font-weight: 600; flex-direction: column; gap: .75rem; }
         .loading-overlay.show { display: flex; }
         .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
@@ -226,7 +167,7 @@
 
         /* Toast */
         #toastContainer { position: fixed; top: 1.25rem; right: 1.25rem; z-index: 99999; display: flex; flex-direction: column; gap: .6rem; pointer-events: none; }
-        .toast-notif { position: relative; overflow: hidden; min-width: 300px; max-width: 380px; background: #fff; border-radius: 12px; box-shadow: 0 10px 35px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.07); display: flex; align-items: flex-start; gap: .85rem; padding: 1rem 1.1rem; pointer-events: all; border-left: 4px solid transparent; opacity: 0; transform: translateX(50px); transition: opacity .25s ease, transform .25s ease; }
+        .toast-notif { position: relative; overflow: hidden; min-width: 300px; max-width: 380px; background: #fff; border-radius: 12px; box-shadow: 0 10px 35px rgba(0,0,0,.14); display: flex; align-items: flex-start; gap: .85rem; padding: 1rem 1.1rem; pointer-events: all; border-left: 4px solid transparent; opacity: 0; transform: translateX(50px); transition: opacity .25s ease, transform .25s ease; }
         .toast-notif.show   { opacity: 1; transform: translateX(0); }
         .toast-notif.hiding { opacity: 0; transform: translateX(50px); }
         .toast-notif.toast-success { border-left-color: #22c55e; }
@@ -239,7 +180,7 @@
         .toast-body  { flex: 1; min-width: 0; }
         .toast-title { font-size: .9rem; font-weight: 700; color: var(--text-main); margin-bottom: .1rem; }
         .toast-msg   { font-size: .8rem; color: var(--text-muted); line-height: 1.4; }
-        .toast-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; line-height: 1; padding: 0; flex-shrink: 0; margin-top: .1rem; transition: color .12s; }
+        .toast-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; line-height: 1; padding: 0; flex-shrink: 0; margin-top: .1rem; }
         .toast-close:hover { color: var(--text-main); }
         .toast-progress { position: absolute; bottom: 0; left: 0; height: 3px; border-radius: 0 0 12px 12px; animation: toastProg linear forwards; }
         .toast-success .toast-progress { background: #22c55e; }
@@ -254,8 +195,6 @@
             .main-wrap { margin-left: var(--sidebar-mini); }
             body.sidebar-collapsed .main-wrap { margin-left: 0; }
             .page-content { padding: 1rem; }
-            #toastContainer { right: .75rem; left: .75rem; top: .75rem; }
-            .toast-notif { min-width: unset; max-width: 100%; }
         }
     </style>
     @stack('styles')
@@ -268,6 +207,12 @@
 </div>
 
 <div id="toastContainer"></div>
+
+@php
+    $role        = session('firebase_role', 'viewer');
+    $isAdmin     = in_array($role, ['admin', 'superadmin']);
+    $isSuperAdmin = $role === 'superadmin';
+@endphp
 
 <!-- Sidebar -->
 <aside class="sidebar" id="sidebar">
@@ -284,18 +229,27 @@
         </button>
     </div>
 
-    {{-- User panel — tampil nama & email dari session --}}
+    <!-- User Panel -->
     <div class="user-panel">
         <div class="user-avatar">
             {{ strtoupper(substr(session('firebase_display_name', 'U'), 0, 1)) }}
         </div>
         <div class="user-info">
             <div class="user-name">{{ session('firebase_display_name', 'Pengguna') }}</div>
-            <div class="user-email">{{ session('firebase_email', '') }}</div>
+            <div class="user-email">
+                <span class="role-badge role-{{ $role }}">
+                    @if($role === 'superadmin') <i class="bi bi-shield-fill-check"></i> Super Admin
+                    @elseif($role === 'admin')  <i class="bi bi-person-gear"></i> Admin
+                    @else                       <i class="bi bi-eye-fill"></i> Viewer
+                    @endif
+                </span>
+            </div>
         </div>
     </div>
 
     <nav class="sidebar-nav">
+
+        {{-- ── Menu Utama: semua role ── --}}
         <div class="nav-section-label">Menu Utama</div>
 
         <a href="{{ route('products.index') }}" data-label="Dashboard"
@@ -303,6 +257,16 @@
             <i class="bi bi-grid-3x3-gap-fill"></i>
             <span>Dashboard</span>
         </a>
+
+        <a href="{{ route('reports.index') }}" data-label="Laporan Stok"
+           class="sidebar-link {{ request()->routeIs('reports.index') ? 'active' : '' }}">
+            <i class="bi bi-bar-chart-line-fill"></i>
+            <span>Laporan Stok</span>
+        </a>
+
+        {{-- ── Produk: admin & superadmin ── --}}
+        @if($isAdmin)
+        <div class="nav-section-label" style="margin-top:1rem">Produk</div>
 
         <a href="{{ route('products.index') }}" data-label="Semua Produk"
            class="sidebar-link {{ request()->routeIs('products.show') ? 'active' : '' }}">
@@ -315,20 +279,26 @@
             <i class="bi bi-plus-circle"></i>
             <span>Tambah Produk</span>
         </a>
+        @endif
 
-        <div class="nav-section-label" style="margin-top:1rem">Informasi</div>
+        {{-- ── Pengaturan: superadmin saja ── --}}
+        @if($isSuperAdmin)
+        <div class="nav-section-label" style="margin-top:1rem">Pengaturan</div>
 
-        <a href="#" data-label="Laporan Stok" class="sidebar-link">
-            <i class="bi bi-bar-chart-line"></i>
-            <span>Laporan Stok</span>
+        <a href="{{ route('settings.index') }}" data-label="Pengaturan Umum"
+           class="sidebar-link {{ request()->routeIs('settings.index') ? 'active' : '' }}">
+            <i class="bi bi-gear-fill"></i>
+            <span>Pengaturan Umum</span>
         </a>
 
-        <a href="#" data-label="Pengaturan" class="sidebar-link">
-            <i class="bi bi-gear"></i>
-            <span>Pengaturan</span>
+        <a href="{{ route('settings.users') }}" data-label="Manajemen User"
+           class="sidebar-link {{ request()->routeIs('settings.users') ? 'active' : '' }}">
+            <i class="bi bi-people-fill"></i>
+            <span>Manajemen User</span>
         </a>
+        @endif
 
-        {{-- Logout --}}
+        {{-- ── Akun ── --}}
         <div class="nav-section-label" style="margin-top:1rem">Akun</div>
         <form method="POST" action="{{ route('logout') }}" id="logoutForm">
             @csrf
@@ -339,9 +309,7 @@
         </form>
     </nav>
 
-    <div class="sidebar-footer">
-        &copy; {{ date('Y') }} InvenTrack
-    </div>
+    <div class="sidebar-footer">&copy; {{ date('Y') }} InvenTrack</div>
 </aside>
 
 <!-- Main Wrapper -->
@@ -363,22 +331,20 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
     window.showLoading = () => document.getElementById('loadingOverlay').classList.add('show');
     window.hideLoading = () => document.getElementById('loadingOverlay').classList.remove('show');
 
-    /* Sidebar toggle */
-    const toggleBtn = document.getElementById('sidebarToggle');
+    // Sidebar toggle with localStorage
     if (localStorage.getItem('sidebarCollapsed') === '1') {
         document.body.classList.add('sidebar-collapsed');
     }
-    toggleBtn.addEventListener('click', () => {
+    document.getElementById('sidebarToggle').addEventListener('click', () => {
         const collapsed = document.body.classList.toggle('sidebar-collapsed');
         localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
     });
 
-    /* Toast system */
+    // Toast system
     window.showToast = function(type, title, message = '', duration = 4500) {
         const icons = { success: 'bi-check-circle-fill', danger: 'bi-x-circle-fill', info: 'bi-info-circle-fill' };
         const container = document.getElementById('toastContainer');
@@ -396,14 +362,13 @@
         container.appendChild(el);
         requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
         const dismiss = () => {
-            el.classList.replace('show','hiding') || el.classList.add('hiding');
+            el.classList.replace('show', 'hiding') || el.classList.add('hiding');
             el.addEventListener('transitionend', () => el.remove(), { once: true });
         };
         const timer = setTimeout(dismiss, duration);
         el.querySelector('.toast-close').addEventListener('click', () => { clearTimeout(timer); dismiss(); });
     };
 </script>
-
 @stack('scripts')
 </body>
 </html>

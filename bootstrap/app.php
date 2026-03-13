@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth.firebase'  => \App\Http\Middleware\FirebaseAuth::class,
             'guest.firebase' => \App\Http\Middleware\GuestFirebase::class,
+            'role'           => \App\Http\Middleware\CheckRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
