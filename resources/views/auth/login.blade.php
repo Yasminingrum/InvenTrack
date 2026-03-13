@@ -7,70 +7,54 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary:    #0f4c81;
-            --primary-lt: #1a6bbf;
-            --accent:     #f97316;
-            --surface:    #f0f4f8;
-            --card-bg:    #ffffff;
-            --border:     #e2e8f0;
-            --text-main:  #0f172a;
-            --text-muted: #64748b;
-            --danger:     #ef4444;
-        }
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--surface); min-height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            position: relative; overflow: hidden;
-        }
-        body::before {
-            content: ''; position: fixed; inset: 0;
-            background: radial-gradient(circle at 20% 20%, rgba(15,76,129,.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(249,115,22,.06) 0%, transparent 50%);
-            pointer-events: none;
-        }
-        .bg-shapes { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-        .bg-shape { position: absolute; border-radius: 50%; opacity: .07; }
-        .bg-shape-1 { width: 500px; height: 500px; background: var(--primary); top: -200px; left: -200px; }
-        .bg-shape-2 { width: 300px; height: 300px; background: var(--accent); bottom: -100px; right: -100px; }
-        .bg-shape-3 { width: 200px; height: 200px; background: var(--primary-lt); top: 50%; right: 10%; opacity: .05; }
-        .auth-wrapper { position: relative; z-index: 10; width: 100%; max-width: 440px; padding: 1.5rem; }
-        .auth-logo { display: flex; align-items: center; justify-content: center; gap: .75rem; margin-bottom: 1.75rem; text-decoration: none; }
-        .logo-icon { width: 46px; height: 46px; background: var(--accent); border-radius: 12px; display: grid; place-items: center; font-size: 1.3rem; color: #fff; box-shadow: 0 4px 14px rgba(249,115,22,.35); }
-        .logo-text { font-size: 1.5rem; font-weight: 800; color: var(--primary); letter-spacing: -.5px; }
-        .logo-sub  { font-size: .65rem; color: var(--text-muted); letter-spacing: .5px; text-transform: uppercase; line-height: 1; }
-        .auth-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 8px 40px rgba(0,0,0,.1); padding: 2.25rem; }
-        .auth-title { font-size: 1.35rem; font-weight: 800; color: var(--text-main); margin-bottom: .25rem; }
-        .auth-subtitle { font-size: .82rem; color: var(--text-muted); margin-bottom: 1.75rem; }
-        .divider { display: flex; align-items: center; gap: .75rem; margin: 1.25rem 0; color: var(--text-muted); font-size: .75rem; font-weight: 600; }
-        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-        .form-group { margin-bottom: 1.1rem; }
-        .form-label { display: block; font-size: .78rem; font-weight: 700; color: var(--text-main); margin-bottom: .4rem; }
-        .input-wrap { position: relative; }
-        .input-icon { position: absolute; left: .85rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: .95rem; pointer-events: none; }
-        .form-input { width: 100%; border: 1.5px solid var(--border); border-radius: 9px; padding: .65rem .85rem .65rem 2.5rem; font-size: .875rem; font-family: inherit; color: var(--text-main); background: #fafcff; transition: border-color .15s, box-shadow .15s; outline: none; }
-        .form-input:focus { border-color: var(--primary-lt); box-shadow: 0 0 0 3px rgba(26,107,191,.12); background: #fff; }
-        .form-input.is-error { border-color: var(--danger); }
-        .btn-eye { position: absolute; right: .75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); padding: .2rem; font-size: .95rem; transition: color .12s; }
-        .btn-eye:hover { color: var(--text-main); }
-        .btn-submit { width: 100%; background: var(--primary); color: #fff; border: none; padding: .75rem 1.25rem; border-radius: 9px; font-size: .9rem; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .5rem; transition: background .15s; box-shadow: 0 4px 14px rgba(15,76,129,.25); margin-top: 1.5rem; }
-        .btn-submit:hover { background: var(--primary-lt); }
-        .btn-submit:disabled { opacity: .7; cursor: not-allowed; }
-        .btn-google { width: 100%; background: #fff; color: var(--text-main); border: 1.5px solid var(--border); padding: .65rem 1.25rem; border-radius: 9px; font-size: .875rem; font-weight: 600; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .6rem; transition: background .15s, box-shadow .15s; }
-        .btn-google:hover { background: #f8fafc; box-shadow: 0 2px 8px rgba(0,0,0,.07); }
-        .google-icon { width: 18px; height: 18px; }
-        .alert { padding: .75rem 1rem; border-radius: 8px; font-size: .825rem; font-weight: 500; display: flex; align-items: flex-start; gap: .55rem; margin-bottom: 1.1rem; }
-        .alert-success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-        .alert-danger  { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
-        .alert i { flex-shrink: 0; margin-top: .1rem; }
-        .auth-footer { text-align: center; margin-top: 1.5rem; font-size: .82rem; color: var(--text-muted); }
-        .auth-footer a { color: var(--primary); font-weight: 700; text-decoration: none; }
-        .spinner-sm { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; display: none; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .field-error { font-size: .73rem; color: var(--danger); margin-top: .3rem; display: none; }
-        .field-error.show { display: block; }
+        :root { --primary:#0f4c81;--primary-lt:#1a6bbf;--accent:#f97316;--surface:#f0f4f8;--card-bg:#ffffff;--border:#e2e8f0;--text-main:#0f172a;--text-muted:#64748b;--danger:#ef4444; }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--surface);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+        body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 20% 20%,rgba(15,76,129,.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(249,115,22,.06) 0%,transparent 50%);pointer-events:none;}
+        .bg-shapes{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+        .bg-shape{position:absolute;border-radius:50%;opacity:.07;}
+        .bg-shape-1{width:500px;height:500px;background:var(--primary);top:-200px;left:-200px;}
+        .bg-shape-2{width:300px;height:300px;background:var(--accent);bottom:-100px;right:-100px;}
+        .bg-shape-3{width:200px;height:200px;background:var(--primary-lt);top:50%;right:10%;opacity:.05;}
+        .auth-wrapper{position:relative;z-index:10;width:100%;max-width:440px;padding:1.5rem;}
+        .auth-logo{display:flex;align-items:center;justify-content:center;gap:.75rem;margin-bottom:1.75rem;text-decoration:none;}
+        .logo-icon{width:46px;height:46px;background:var(--accent);border-radius:12px;display:grid;place-items:center;font-size:1.3rem;color:#fff;box-shadow:0 4px 14px rgba(249,115,22,.35);}
+        .logo-text{font-size:1.5rem;font-weight:800;color:var(--primary);letter-spacing:-.5px;}
+        .logo-sub{font-size:.65rem;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;line-height:1;}
+        .auth-card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;box-shadow:0 8px 40px rgba(0,0,0,.1);padding:2.25rem;}
+        .auth-title{font-size:1.35rem;font-weight:800;color:var(--text-main);margin-bottom:.25rem;}
+        .auth-subtitle{font-size:.82rem;color:var(--text-muted);margin-bottom:1.75rem;}
+        .divider{display:flex;align-items:center;gap:.75rem;margin:1.25rem 0;color:var(--text-muted);font-size:.75rem;font-weight:600;}
+        .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+        .form-group{margin-bottom:1.1rem;}
+        .form-label{display:block;font-size:.78rem;font-weight:700;color:var(--text-main);margin-bottom:.4rem;}
+        .input-wrap{position:relative;}
+        .input-icon{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:.95rem;pointer-events:none;}
+        .form-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:.65rem .85rem .65rem 2.5rem;font-size:.875rem;font-family:inherit;color:var(--text-main);background:#fafcff;transition:border-color .15s,box-shadow .15s;outline:none;}
+        .form-input:focus{border-color:var(--primary-lt);box-shadow:0 0 0 3px rgba(26,107,191,.12);background:#fff;}
+        .form-input.is-error{border-color:var(--danger);}
+        .btn-eye{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:.2rem;font-size:.95rem;}
+        .btn-eye:hover{color:var(--text-main);}
+        .btn-submit{width:100%;background:var(--primary);color:#fff;border:none;padding:.75rem 1.25rem;border-radius:9px;font-size:.9rem;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:background .15s;box-shadow:0 4px 14px rgba(15,76,129,.25);margin-top:1.5rem;}
+        .btn-submit:hover{background:var(--primary-lt);}
+        .btn-submit:disabled{opacity:.7;cursor:not-allowed;}
+        .btn-google{width:100%;background:#fff;color:var(--text-main);border:1.5px solid var(--border);padding:.65rem 1.25rem;border-radius:9px;font-size:.875rem;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem;transition:background .15s,box-shadow .15s;}
+        .btn-google:hover{background:#f8fafc;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+        .google-icon{width:18px;height:18px;}
+        .alert{padding:.75rem 1rem;border-radius:8px;font-size:.825rem;font-weight:500;display:flex;align-items:flex-start;gap:.55rem;margin-bottom:1.1rem;}
+        .alert-success{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;}
+        .alert-danger{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}
+        .alert-warning{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+        .alert i{flex-shrink:0;margin-top:.1rem;}
+        .auth-footer{text-align:center;margin-top:1.5rem;font-size:.82rem;color:var(--text-muted);}
+        .auth-footer a{color:var(--primary);font-weight:700;text-decoration:none;}
+        .spinner-sm{width:18px;height:18px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .field-error{font-size:.73rem;color:var(--danger);margin-top:.3rem;display:none;}
+        .field-error.show{display:block;}
+        /* Resend link dalam alert */
+        #resendLink{color:#92400e;font-weight:700;cursor:pointer;text-decoration:underline;}
+        #resendLink:hover{color:#78350f;}
     </style>
 </head>
 <body>
@@ -107,6 +91,15 @@
         <div id="firebaseAlert" class="alert alert-danger" style="display:none">
             <i class="bi bi-exclamation-circle-fill"></i>
             <span id="firebaseAlertMsg">Terjadi kesalahan.</span>
+        </div>
+
+        {{-- ⚠️ Muncul jika email belum diverifikasi --}}
+        <div id="verifyWarning" class="alert alert-warning" style="display:none">
+            <i class="bi bi-envelope-exclamation-fill"></i>
+            <div>
+                Email Anda belum diverifikasi. Silakan cek inbox Anda.
+                <br><span id="resendLink">Kirim ulang email verifikasi</span>
+            </div>
         </div>
 
         <button class="btn-google" id="btnGoogle" type="button">
@@ -156,7 +149,8 @@
 <script type="module">
     import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword,
-             signInWithPopup, GoogleAuthProvider }  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+             signInWithPopup, GoogleAuthProvider,
+             sendEmailVerification }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, get, set }           from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -178,7 +172,7 @@
         const el = document.getElementById('firebaseAlert');
         document.getElementById('firebaseAlertMsg').textContent = msg;
         el.style.display = 'flex';
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        document.getElementById('verifyWarning').style.display = 'none';
     }
 
     function setLoading(loading) {
@@ -190,67 +184,45 @@
         text.style.display    = loading ? 'none'  : 'flex';
     }
 
-    /**
-     * Ambil role dari Firebase DB, buat entry baru jika belum ada.
-     * User pertama kali login → role default: 'viewer'
-     */
     async function getUserRole(uid, email, displayName) {
         const userRef = ref(db, `users/${uid}`);
         const snap    = await get(userRef);
-
         if (snap.exists()) {
             return snap.val().role || 'viewer';
         }
-
-        // User baru — simpan dengan role default 'viewer'
+        // User baru via Google tanpa register dulu
         await set(userRef, {
-            email:        email,
-            display_name: displayName || email,
-            role:         'viewer',
-            created_at:   new Date().toISOString(),
+            email, display_name: displayName || email,
+            role: 'viewer', email_verified: true,
+            created_at: new Date().toISOString(),
         });
         return 'viewer';
     }
 
     async function storeSessionAndRedirect(user) {
-        try {
-            const role = await getUserRole(user.uid, user.email, user.displayName);
-
-            const res = await fetch("{{ route('auth.session') }}", {
-                method:  'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Accept':       'application/json',
-                },
-                body: JSON.stringify({
-                    uid:          user.uid,
-                    email:        user.email,
-                    display_name: user.displayName || user.email,
-                    role:         role,
-                }),
-            });
-
-            if (res.ok) {
-                window.location.href = "{{ route('products.index') }}";
-            } else {
-                showError('Gagal menyimpan sesi. Coba lagi.');
-                setLoading(false);
-            }
-        } catch (e) {
-            showError('Gagal membaca data user. Periksa koneksi.');
+        const role = await getUserRole(user.uid, user.email, user.displayName);
+        const res  = await fetch("{{ route('auth.session') }}", {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+            body: JSON.stringify({ uid: user.uid, email: user.email, display_name: user.displayName || user.email, role }),
+        });
+        if (res.ok) {
+            window.location.href = "{{ route('products.index') }}";
+        } else {
+            showError('Gagal menyimpan sesi. Coba lagi.');
             setLoading(false);
         }
     }
 
-    // Email/Password Login
+    // ── Email/Password Login ──
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        document.getElementById('firebaseAlert').style.display = 'none';
+        document.getElementById('firebaseAlert').style.display  = 'none';
+        document.getElementById('verifyWarning').style.display  = 'none';
 
         const email    = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
-        let valid      = true;
+        let valid = true;
 
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             document.getElementById('emailError').classList.add('show');
@@ -260,7 +232,6 @@
             document.getElementById('emailError').classList.remove('show');
             document.getElementById('email').classList.remove('is-error');
         }
-
         if (!password) {
             document.getElementById('passwordError').classList.add('show');
             document.getElementById('password').classList.add('is-error');
@@ -269,13 +240,24 @@
             document.getElementById('passwordError').classList.remove('show');
             document.getElementById('password').classList.remove('is-error');
         }
-
         if (!valid) return;
         setLoading(true);
 
         try {
             const cred = await signInWithEmailAndPassword(auth, email, password);
+
+            // ✅ CEK VERIFIKASI EMAIL
+            const isTestEmail = cred.user.email.endsWith('@inventrack.test');
+            if (!cred.user.emailVerified && !isTestEmail) {
+                setLoading(false);
+                // Simpan referensi user untuk tombol resend
+                window._unverifiedUser = cred.user;
+                document.getElementById('verifyWarning').style.display = 'flex';
+                return;
+            }
+
             await storeSessionAndRedirect(cred.user);
+
         } catch (err) {
             setLoading(false);
             const map = {
@@ -290,7 +272,20 @@
         }
     });
 
-    // Google Sign-In
+    // ── Kirim ulang verifikasi dari halaman login ──
+    document.getElementById('resendLink').addEventListener('click', async () => {
+        const user = window._unverifiedUser;
+        if (!user) return;
+        try {
+            await sendEmailVerification(user);
+            document.getElementById('resendLink').textContent = '✓ Email terkirim! Cek inbox Anda.';
+            document.getElementById('resendLink').style.cursor = 'default';
+        } catch (err) {
+            document.getElementById('resendLink').textContent = 'Gagal kirim. Coba beberapa saat lagi.';
+        }
+    });
+
+    // ── Google Sign-In (sudah verified otomatis) ──
     document.getElementById('btnGoogle').addEventListener('click', async () => {
         document.getElementById('firebaseAlert').style.display = 'none';
         try {
@@ -303,6 +298,7 @@
         }
     });
 
+    // ── Toggle password ──
     document.getElementById('togglePassword').addEventListener('click', () => {
         const input = document.getElementById('password');
         const icon  = document.getElementById('eyeIcon');
