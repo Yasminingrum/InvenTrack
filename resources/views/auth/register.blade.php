@@ -403,10 +403,9 @@
 
 <script type="module">
     import { initializeApp }                         from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword,
-            updateProfile, sendEmailVerification,
-            signInWithRedirect, getRedirectResult,
-            GoogleAuthProvider }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword,
+         signInWithPopup, GoogleAuthProvider,
+         sendEmailVerification }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, set, get }             from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -722,9 +721,16 @@
     })();
 
     // ── Google Register ──
-    document.getElementById('btnGoogle').addEventListener('click', () => {
+    document.getElementById('btnGoogle').addEventListener('click', async () => {
         document.getElementById('firebaseAlert').style.display = 'none';
-        signInWithRedirect(auth, provider);
+        try {
+            const result = await signInWithPopup(auth, provider);
+            await storeSessionAndRedirect(result.user);
+        } catch (err) {
+            if (err.code !== 'auth/popup-closed-by-user') {
+                showError(`Login Google gagal: ${err.message}`);
+            }
+        }
     });
 
     // ── Modal: Lanjut & Masuk ──
