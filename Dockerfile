@@ -17,7 +17,9 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chmod -R 777 storage bootstrap/cache
 
 COPY docker/nginx.conf /etc/nginx/sites-available/default
+COPY docker/start.sh /start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 80
 
-CMD ["sh", "-c", "php-fpm -D && sleep 1 && nginx -g 'daemon off;'"]
+CMD ["/start.sh"]
