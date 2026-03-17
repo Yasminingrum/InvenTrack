@@ -1,14 +1,14 @@
 #!/bin/sh
 set -e
 
-# Start php-fpm in background
-php-fpm -D
+# Start php-fpm in foreground dulu pastikan jalan
+php-fpm &
 
-# Wait for php-fpm to be ready
-sleep 2
+# Wait
+sleep 3
 
 # Test nginx config
 nginx -t
 
-# Start nginx
+# Start nginx foreground
 exec nginx -g 'daemon off;'
