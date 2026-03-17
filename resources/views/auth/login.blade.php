@@ -290,10 +290,14 @@
     (async () => {
         try {
             const result = await getRedirectResult(auth);
+            console.log('Redirect result:', result);
             if (result && result.user) {
                 await storeSessionAndRedirect(result.user);
+            } else {
+                console.log('No redirect result found');
             }
         } catch (err) {
+            console.error('Redirect error:', err);
             showError(`Login Google gagal: ${err.message}`);
         }
     })();
