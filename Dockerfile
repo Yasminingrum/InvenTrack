@@ -1,7 +1,7 @@
-FROM php:8.2-fpm
+FROM php:8.2-cli
 
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libzip-dev libonig-dev libxml2-dev nginx gettext-base \
+    git curl zip unzip libzip-dev libonig-dev libxml2-dev \
     && docker-php-ext-install zip mbstring \
     && rm -rf /var/lib/apt/lists/*
 
@@ -16,10 +16,6 @@ RUN composer install --no-dev --optimize-autoloader
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chmod -R 777 storage bootstrap/cache
 
-COPY docker/nginx.conf /etc/nginx/sites-available/default
-COPY docker/start.sh /start.sh
-RUN chmod +x /start.sh
+EXPOSE 8080
 
-EXPOSE 80
-
-CMD ["/start.sh"]
+CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
