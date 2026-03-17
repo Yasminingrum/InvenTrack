@@ -404,8 +404,9 @@
 <script type="module">
     import { initializeApp }                         from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword,
-             updateProfile, sendEmailVerification,
-             signInWithPopup, GoogleAuthProvider }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+            updateProfile, sendEmailVerification,
+            signInWithRedirect, getRedirectResult,
+            GoogleAuthProvider }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, set, get }             from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -677,15 +678,17 @@
     // ══════════════════════════════════════════
     // REGISTER Google
     // ══════════════════════════════════════════
-    document.getElementById('btnGoogle').addEventListener('click', async () => {
-        document.getElementById('firebaseAlert').style.display = 'none';
+    // ── Handle redirect result saat halaman dimuat ──
+    (async () => {
         try {
-            const result = await signInWithPopup(auth, provider);
-            const user   = result.user;
-            const snap   = await get(ref(db, `users/${user.uid}`));
+            const result = await getRedirectResult(auth);
+            if (!result || !result.user) return;
+
+            const user = result.user;
+            const snap = await get(ref(db, `users/${user.uid}`));
 
             if (snap.exists()) {
-                // User LAMA → langsung masuk, tidak perlu pilih role
+                // User LAMA → langsung masuk
                 const role = snap.val().role || 'viewer';
                 await storeSessionAndRedirect(user.uid, user.email, user.displayName, role);
             } else {
@@ -696,7 +699,6 @@
 
                 document.getElementById('modalUserName').textContent = user.displayName || user.email;
 
-                // Reset modal ke state awal (viewer terpilih)
                 ['viewer','admin','superadmin'].forEach(r => {
                     document.getElementById(`card-${r}`).className = 'role-card';
                 });
@@ -709,10 +711,14 @@
                 document.getElementById('roleModal').classList.add('open');
             }
         } catch (err) {
-            if (err.code !== 'auth/popup-closed-by-user') {
-                showError(`Login Google gagal: ${err.message}`);
-            }
+            showError(`Login Google gagal: ${err.message}`);
         }
+    })();
+
+    // ── Google Register ──
+    document.getElementById('btnGoogle').addEventListener('click', () => {
+        document.getElementById('firebaseAlert').style.display = 'none';
+        signInWithRedirect(auth, provider);
     });
 
     // ── Modal: Lanjut & Masuk ──
