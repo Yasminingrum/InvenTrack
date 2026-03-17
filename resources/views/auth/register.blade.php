@@ -679,10 +679,15 @@
     // REGISTER Google
     // ══════════════════════════════════════════
     // ── Handle redirect result saat halaman dimuat ──
+    // ── Handle redirect result saat halaman dimuat ──
     (async () => {
         try {
             const result = await getRedirectResult(auth);
-            if (!result || !result.user) return;
+            console.log('Register redirect result:', result);
+            if (!result || !result.user) {
+                console.log('No redirect result');
+                return;
+            }
 
             const user = result.user;
             const snap = await get(ref(db, `users/${user.uid}`));
@@ -711,6 +716,7 @@
                 document.getElementById('roleModal').classList.add('open');
             }
         } catch (err) {
+            console.error('Register redirect error:', err);
             showError(`Login Google gagal: ${err.message}`);
         }
     })();
