@@ -149,8 +149,9 @@
 <script type="module">
     import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword,
-             signInWithPopup, GoogleAuthProvider,
-             sendEmailVerification }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+             signInWithRedirect, getRedirectResult,
+            GoogleAuthProvider,
+            sendEmailVerification }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, get, set }           from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -285,17 +286,22 @@
         }
     });
 
-    // ── Google Sign-In (sudah verified otomatis) ──
-    document.getElementById('btnGoogle').addEventListener('click', async () => {
-        document.getElementById('firebaseAlert').style.display = 'none';
+    // ── Handle redirect result saat halaman dimuat ──
+    (async () => {
         try {
-            const result = await signInWithPopup(auth, provider);
-            await storeSessionAndRedirect(result.user);
-        } catch (err) {
-            if (err.code !== 'auth/popup-closed-by-user') {
-                showError(`Login Google gagal: ${err.message}`);
+            const result = await getRedirectResult(auth);
+            if (result && result.user) {
+                await storeSessionAndRedirect(result.user);
             }
+        } catch (err) {
+            showError(`Login Google gagal: ${err.message}`);
         }
+    })();
+
+    // ── Google Sign-In ──
+    document.getElementById('btnGoogle').addEventListener('click', () => {
+        document.getElementById('firebaseAlert').style.display = 'none';
+        signInWithRedirect(auth, provider);
     });
 
     // ── Toggle password ──
