@@ -1,5 +1,19 @@
 #!/bin/sh
-set -e
+
+# Start php-fpm
+php-fpm &
+
+sleep 3
+
+# Debug: cek socket/port php-fpm
+echo "=== PHP-FPM processes ==="
+ps aux | grep php
+echo "=== PHP-FPM sockets ==="
+find /var/run -name "*.sock" 2>/dev/null
+echo "=== Listening ports ==="
+ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || echo "no netstat"
+echo "=== PORT value ==="
+echo "PORT=$PORT"
 
 # Generate nginx config
 cat > /etc/nginx/sites-available/default << EOF
@@ -14,25 +28,13 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_pass 127.0.0.1:9000;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
         include fastcgi_params;
     }
-
-    location ~ /\.ht {
-        deny all;
-    }
 }
 EOF
 
-# Start php-fpm
-php-fpm &
-
-sleep 3
-
-# Test nginx config
 nginx -t
-
-# Start nginx
 exec nginx -g 'daemon off;'
