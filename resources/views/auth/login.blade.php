@@ -149,9 +149,9 @@
 <script type="module">
     import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword,
-             signInWithRedirect, getRedirectResult,
-            GoogleAuthProvider,
-            sendEmailVerification }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+         signInWithPopup, signInWithRedirect, getRedirectResult,
+         GoogleAuthProvider,
+         sendEmailVerification }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, get, set }           from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -293,8 +293,6 @@
             console.log('Redirect result:', result);
             if (result && result.user) {
                 await storeSessionAndRedirect(result.user);
-            } else {
-                console.log('No redirect result found');
             }
         } catch (err) {
             console.error('Redirect error:', err);
@@ -303,9 +301,20 @@
     })();
 
     // ── Google Sign-In ──
-    document.getElementById('btnGoogle').addEventListener('click', () => {
+    document.getElementById('btnGoogle').addEventListener('click', async () => {
         document.getElementById('firebaseAlert').style.display = 'none';
-        signInWithRedirect(auth, provider);
+        try {
+            // Coba popup dulu
+            const result = await signInWithPopup(auth, provider);
+            await storeSessionAndRedirect(result.user);
+        } catch (err) {
+            if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+                // Fallback ke redirect
+                signInWithRedirect(auth, provider);
+            } else {
+                showError(`Login Google gagal: ${err.message}`);
+            }
+        }
     });
 
     // ── Toggle password ──
