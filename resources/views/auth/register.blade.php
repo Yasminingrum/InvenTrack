@@ -677,19 +677,12 @@
     // ══════════════════════════════════════════
     // REGISTER Google
     // ══════════════════════════════════════════
-    // ── Handle redirect result saat halaman dimuat ──
-    // ── Handle redirect result saat halaman dimuat ──
-    (async () => {
+    document.getElementById('btnGoogle').addEventListener('click', async () => {
+        document.getElementById('firebaseAlert').style.display = 'none';
         try {
-            const result = await getRedirectResult(auth);
-            console.log('Register redirect result:', result);
-            if (!result || !result.user) {
-                console.log('No redirect result');
-                return;
-            }
-
-            const user = result.user;
-            const snap = await get(ref(db, `users/${user.uid}`));
+            const result = await signInWithPopup(auth, provider);
+            const user   = result.user;
+            const snap   = await get(ref(db, `users/${user.uid}`));
 
             if (snap.exists()) {
                 // User LAMA → langsung masuk
@@ -714,18 +707,6 @@
 
                 document.getElementById('roleModal').classList.add('open');
             }
-        } catch (err) {
-            console.error('Register redirect error:', err);
-            showError(`Login Google gagal: ${err.message}`);
-        }
-    })();
-
-    // ── Google Register ──
-    document.getElementById('btnGoogle').addEventListener('click', async () => {
-        document.getElementById('firebaseAlert').style.display = 'none';
-        try {
-            const result = await signInWithPopup(auth, provider);
-            await storeSessionAndRedirect(result.user);
         } catch (err) {
             if (err.code !== 'auth/popup-closed-by-user') {
                 showError(`Login Google gagal: ${err.message}`);
