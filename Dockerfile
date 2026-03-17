@@ -1,7 +1,7 @@
 FROM php:8.2-fpm
 
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libzip-dev libonig-dev libxml2-dev nginx \
+    git curl zip unzip libzip-dev libonig-dev libxml2-dev nginx gettext-base \
     && docker-php-ext-install zip mbstring \
     && rm -rf /var/lib/apt/lists/*
 
