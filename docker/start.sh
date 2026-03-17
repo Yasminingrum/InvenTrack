@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-# Generate nginx config dengan port dari Railway
+# Generate nginx config
 cat > /etc/nginx/sites-available/default << EOF
 server {
     listen ${PORT} default_server;
@@ -14,7 +14,7 @@ server {
     }
 
     location ~ \.php$ {
-        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
         include fastcgi_params;
