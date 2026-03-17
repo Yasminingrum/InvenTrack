@@ -24,8 +24,9 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-RUN a2enmod rewrite
-
-RUN echo "php_value[session.save_path] = /tmp" >> /usr/local/etc/php/php.ini || true
+RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork rewrite
 
 EXPOSE 80
+
+CMD ["apache2-foreground"]
