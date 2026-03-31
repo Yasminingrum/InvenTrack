@@ -19,17 +19,8 @@ Route::middleware('guest.firebase')->group(function () {
     Route::get('/register', [AuthController::class, 'registerPage'])->name('register');
 });
 
-Route::post('/auth/session',           [AuthController::class, 'storeSession'])->name('auth.session');
-Route::post('/logout',                 [AuthController::class, 'logout'])->name('logout');
-
-// Kirim email verifikasi custom (dipanggil JS setelah Google register)
-Route::post('/auth/send-verification', [AuthController::class, 'sendVerification'])->name('auth.send-verification');
-
-// User klik link dari email (Google user) → verifikasi token → redirect ke login
-Route::get('/auth/verify-email',       [AuthController::class, 'verifyEmail'])->name('auth.verify-email');
-
-// User klik link Firebase (email/password user) → sync email_verified ke DB → redirect ke login
-Route::get('/auth/verify-email-sync',  [AuthController::class, 'verifyEmailSync'])->name('auth.verify-email-sync');
+Route::post('/auth/session', [AuthController::class, 'storeSession'])->name('auth.session');
+Route::post('/logout',       [AuthController::class, 'logout'])->name('logout');
 
 // ══════════════════════════════════════════════
 // PROTECTED ROUTES

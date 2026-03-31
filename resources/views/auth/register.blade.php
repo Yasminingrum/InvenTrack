@@ -402,11 +402,11 @@
 </div>
 
 <script type="module">
-    import { initializeApp }                         from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, updateProfile,
-         signInWithPopup, GoogleAuthProvider,
-         sendEmailVerification }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, set, get }             from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { initializeApp }                          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword,
+             updateProfile, signInWithPopup,
+             GoogleAuthProvider, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, set, get }              from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
         apiKey:            "{{ env('FIREBASE_API_KEY') }}",
@@ -423,46 +423,29 @@
     const db       = getDatabase(app);
     const provider = new GoogleAuthProvider();
 
-    // ══════════════════════════════════════════
-    // KODE UNDANGAN → ROLE
-    // Tambah/ubah kode di sini sesuai kebutuhan
-    // ══════════════════════════════════════════
-    const INVITE_CODES = {
-        'ADMIN2024': 'admin',
-        'SUPER999':  'superadmin',
-    };
-
+    const INVITE_CODES = { 'ADMIN2024': 'admin', 'SUPER999': 'superadmin' };
     function getRoleFromCode(code) {
         if (!code) return null;
         return INVITE_CODES[code.trim().toUpperCase()] || null;
     }
 
-    // ══════════════════════════════════════════
-    // STATE MODAL
-    // ══════════════════════════════════════════
-    let _googleUser    = null;
-    let _selectedRole  = 'viewer';
-    let _codeUnlocked  = false;   // true jika kode sudah divalidasi untuk role terpilih
+    let _googleUser   = null;
+    let _selectedRole = 'viewer';
+    let _codeUnlocked = false;
 
-    // ── Pilih role card ──
     window.selectRole = function(role) {
         _selectedRole = role;
         _codeUnlocked = false;
-
-        // Update highlight card
         ['viewer','admin','superadmin'].forEach(r => {
             const card = document.getElementById(`card-${r}`);
-            card.className = 'role-card'; // reset
+            card.className = 'role-card';
             if (r === role) card.classList.add(`selected-${role}`);
         });
-
         const needsCode = (role === 'admin' || role === 'superadmin');
         const section   = document.getElementById('modalCodeSection');
-
         if (needsCode) {
             section.classList.add('show');
             document.getElementById('modalCodeLabelRole').textContent = `(wajib untuk ${role})`;
-            // Reset field kode
             const input = document.getElementById('modalInviteCode');
             input.value = '';
             input.classList.remove('is-success', 'is-error');
@@ -473,17 +456,14 @@
         } else {
             section.classList.remove('show');
         }
-
         updateOkButton();
     };
 
-    // ── Validasi kode saat diketik di modal ──
     window.onModalCodeInput = function(val) {
         const code  = val.trim().toUpperCase();
         const hint  = document.getElementById('modalInviteHint');
         const input = document.getElementById('modalInviteCode');
         const roleIcons = { admin: 'bi-person-gear', superadmin: 'bi-shield-fill-check' };
-
         if (!code) {
             hint.className = 'invite-hint hint-none';
             hint.innerHTML = `<i class="bi bi-info-circle"></i> Masukkan kode untuk melanjutkan sebagai <strong>${_selectedRole}</strong>.`;
@@ -492,45 +472,37 @@
             updateOkButton();
             return;
         }
-
         const roleFromCode = getRoleFromCode(code);
-
         if (roleFromCode === _selectedRole) {
             hint.className = 'invite-hint hint-valid';
             hint.innerHTML = `<i class="bi bi-check-circle-fill"></i> Kode valid! Role <span class="role-preview ${roleFromCode}"><i class="bi ${roleIcons[roleFromCode]}"></i> ${roleFromCode}</span> aktif.`;
-            input.classList.add('is-success');
-            input.classList.remove('is-error');
+            input.classList.add('is-success'); input.classList.remove('is-error');
             _codeUnlocked = true;
-        } else if (roleFromCode && roleFromCode !== _selectedRole) {
+        } else if (roleFromCode) {
             hint.className = 'invite-hint hint-invalid';
             hint.innerHTML = `<i class="bi bi-x-circle-fill"></i> Kode ini untuk role <strong>${roleFromCode}</strong>, bukan <strong>${_selectedRole}</strong>.`;
-            input.classList.add('is-error');
-            input.classList.remove('is-success');
+            input.classList.add('is-error'); input.classList.remove('is-success');
             _codeUnlocked = false;
         } else {
             hint.className = 'invite-hint hint-invalid';
             hint.innerHTML = `<i class="bi bi-x-circle-fill"></i> Kode tidak valid.`;
-            input.classList.add('is-error');
-            input.classList.remove('is-success');
+            input.classList.add('is-error'); input.classList.remove('is-success');
             _codeUnlocked = false;
         }
-
         updateOkButton();
     };
 
     function updateOkButton() {
-        const btn       = document.getElementById('btnModalOk');
-        const needsCode = (_selectedRole === 'admin' || _selectedRole === 'superadmin');
-        btn.disabled    = needsCode && !_codeUnlocked;
+        const btn    = document.getElementById('btnModalOk');
+        const needs  = (_selectedRole === 'admin' || _selectedRole === 'superadmin');
+        btn.disabled = needs && !_codeUnlocked;
     }
 
-    // ── Cek kode undangan di form email/password ──
     window.checkInviteCode = function(val) {
         const hint  = document.getElementById('inviteHint');
         const input = document.getElementById('inviteCode');
         const code  = val.trim().toUpperCase();
         const roleIcons = { admin: 'bi-person-gear', superadmin: 'bi-shield-fill-check' };
-
         if (!code) {
             hint.className = 'invite-hint hint-none';
             hint.innerHTML = `<i class="bi bi-info-circle"></i> Tanpa kode → role <span class="role-preview viewer"><i class="bi bi-eye-fill"></i> viewer</span>`;
@@ -541,17 +513,14 @@
         if (role) {
             hint.className = 'invite-hint hint-valid';
             hint.innerHTML = `<i class="bi bi-check-circle-fill"></i> Kode valid → role <span class="role-preview ${role}"><i class="bi ${roleIcons[role]}"></i> ${role}</span>`;
-            input.classList.add('is-success');
-            input.classList.remove('is-error');
+            input.classList.add('is-success'); input.classList.remove('is-error');
         } else {
             hint.className = 'invite-hint hint-invalid';
             hint.innerHTML = `<i class="bi bi-x-circle-fill"></i> Kode tidak valid → akan didaftarkan sebagai <span class="role-preview viewer"><i class="bi bi-eye-fill"></i> viewer</span>`;
-            input.classList.add('is-error');
-            input.classList.remove('is-success');
+            input.classList.add('is-error'); input.classList.remove('is-success');
         }
     };
 
-    // ── Helpers ──
     function showError(msg) {
         const el = document.getElementById('firebaseAlert');
         document.getElementById('firebaseAlertMsg').textContent = msg;
@@ -576,41 +545,12 @@
 
     async function saveUserToDb(uid, email, displayName, role) {
         await set(ref(db, `users/${uid}`), {
-            email:          email,
-            display_name:   displayName || email,
-            role:           role,
-            email_verified: false,
-            created_at:     new Date().toISOString(),
+            email, display_name: displayName || email,
+            role, email_verified: false,
+            created_at: new Date().toISOString(),
         });
     }
 
-    async function sendVerificationEmail(uid, email, name) {
-        const res  = await fetch("{{ route('auth.send-verification') }}", {
-            method:  'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept':       'application/json',
-            },
-            body: JSON.stringify({ uid, email, name }),
-        });
-        if (!res.ok) {
-            const text = await res.text();
-            // Ambil pesan error dari JSON Laravel jika ada
-            let msg = `Server error ${res.status}`;
-            try {
-                const json = JSON.parse(text);
-                msg = json.message || json.error || msg;
-            } catch (_) {
-                // bukan JSON, tampilkan 300 karakter pertama
-                msg = text.substring(0, 300);
-            }
-            throw new Error(msg);
-        }
-        return true;
-    }
-
-    // ── Password strength ──
     window.checkPasswordStrength = function(password) {
         const fill = document.getElementById('strengthFill');
         const text = document.getElementById('strengthText');
@@ -627,10 +567,8 @@
             { width: '100%', bg: '#22c55e', label: 'Kuat 💪' },
         ];
         const lv = levels[score];
-        fill.style.width      = lv.width;
-        fill.style.background = lv.bg;
-        text.textContent      = lv.label;
-        text.style.color      = lv.bg || 'var(--text-muted)';
+        fill.style.width = lv.width; fill.style.background = lv.bg;
+        text.textContent = lv.label; text.style.color = lv.bg || 'var(--text-muted)';
     };
 
     // ══════════════════════════════════════════
@@ -648,13 +586,13 @@
         const code    = document.getElementById('inviteCode').value.trim();
         let valid = true;
 
-        if (!name) { document.getElementById('nameError').classList.add('show');     valid = false; }
+        if (!name)  { document.getElementById('nameError').classList.add('show');     valid = false; }
         else          document.getElementById('nameError').classList.remove('show');
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            document.getElementById('emailError').classList.add('show');  valid = false;
+            document.getElementById('emailError').classList.add('show'); valid = false;
         } else document.getElementById('emailError').classList.remove('show');
         if (pwd.length < 8) { document.getElementById('passwordError').classList.add('show'); valid = false; }
-        else                   document.getElementById('passwordError').classList.remove('show');
+        else                  document.getElementById('passwordError').classList.remove('show');
         if (pwd !== confPwd) { document.getElementById('confirmError').classList.add('show'); valid = false; }
         else                   document.getElementById('confirmError').classList.remove('show');
         if (!agreed) { document.getElementById('termsError').classList.add('show'); valid = false; }
@@ -667,10 +605,8 @@
             const role = getRoleFromCode(code) || 'viewer';
             const cred = await createUserWithEmailAndPassword(auth, email, pwd);
             await updateProfile(cred.user, { displayName: name });
-            await sendEmailVerification(cred.user, {
-                url: `${window.location.origin}/auth/verify-email-sync?uid=${cred.user.uid}`,
-                handleCodeInApp: false,
-            });
+            // Firebase kirim email verifikasi built-in
+            await sendEmailVerification(cred.user);
             await saveUserToDb(cred.user.uid, email, name, role);
             setLoading(false);
             showVerifyScreen(email);
@@ -679,7 +615,7 @@
             const map = {
                 'auth/email-already-in-use':   'Email sudah terdaftar. Silakan login.',
                 'auth/invalid-email':          'Format email tidak valid.',
-                'auth/weak-password':          'Password terlalu lemah.',
+                'auth/weak-password':          'Password terlalu lemah (min. 6 karakter).',
                 'auth/network-request-failed': 'Koneksi gagal. Periksa internet Anda.',
             };
             showError(map[err.code] || `Error: ${err.message}`);
@@ -697,27 +633,19 @@
             const snap   = await get(ref(db, `users/${user.uid}`));
 
             if (snap.exists()) {
-                // User LAMA → simpan session dan masuk
+                // User LAMA → langsung simpan session dan masuk
                 const role = snap.val().role || 'viewer';
                 const res  = await fetch("{{ route('auth.session') }}", {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
                     body: JSON.stringify({ uid: user.uid, email: user.email, display_name: user.displayName || user.email, role }),
                 });
-                if (res.ok) {
-                    window.location.href = "{{ route('products.index') }}";
-                } else {
-                    showError('Gagal menyimpan sesi. Coba lagi.');
-                }
+                if (res.ok) window.location.href = "{{ route('products.index') }}";
+                else showError('Gagal menyimpan sesi. Coba lagi.');
             } else {
-
                 // User BARU → tampilkan modal pilih role
-                _googleUser   = user;
-                _selectedRole = 'viewer';
-                _codeUnlocked = false;
-
+                _googleUser = user; _selectedRole = 'viewer'; _codeUnlocked = false;
                 document.getElementById('modalUserName').textContent = user.displayName || user.email;
-
                 ['viewer','admin','superadmin'].forEach(r => {
                     document.getElementById(`card-${r}`).className = 'role-card';
                 });
@@ -726,7 +654,6 @@
                 document.getElementById('modalInviteCode').value = '';
                 document.getElementById('modalInviteCode').classList.remove('is-success', 'is-error');
                 updateOkButton();
-
                 document.getElementById('roleModal').classList.add('open');
             }
         } catch (err) {
@@ -737,17 +664,24 @@
     });
 
     // ── Modal: Lanjut & Masuk ──
+    // Google user: emailVerified sudah true → langsung simpan session dan masuk
     document.getElementById('btnModalOk').addEventListener('click', async () => {
         if (!_googleUser) return;
         const finalRole = _selectedRole;
-
         document.getElementById('btnModalOk').disabled = true;
         document.getElementById('roleModal').classList.remove('open');
-
         try {
             await saveUserToDb(_googleUser.uid, _googleUser.email, _googleUser.displayName, finalRole);
-            await sendVerificationEmail(_googleUser.uid, _googleUser.email, _googleUser.displayName);
-            showVerifyScreen(_googleUser.email);
+            const res = await fetch("{{ route('auth.session') }}", {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                body: JSON.stringify({ uid: _googleUser.uid, email: _googleUser.email, display_name: _googleUser.displayName || _googleUser.email, role: finalRole }),
+            });
+            if (res.ok) {
+                window.location.href = "{{ route('products.index') }}";
+            } else {
+                throw new Error('Gagal menyimpan sesi.');
+            }
         } catch (err) {
             showError(`Gagal: ${err.message}`);
             document.getElementById('btnModalOk').disabled = false;
@@ -758,12 +692,10 @@
     // ── Modal: Batal ──
     document.getElementById('btnModalCancel').addEventListener('click', () => {
         document.getElementById('roleModal').classList.remove('open');
-        _googleUser   = null;
-        _selectedRole = 'viewer';
-        _codeUnlocked = false;
+        _googleUser = null; _selectedRole = 'viewer'; _codeUnlocked = false;
     });
 
-    // ── Kirim ulang verifikasi ──
+    // ── Kirim ulang verifikasi (untuk email/password user di verify screen) ──
     let resendCooldown = false;
     document.getElementById('btnResend').addEventListener('click', async () => {
         if (resendCooldown) return;
@@ -773,7 +705,7 @@
             await sendEmailVerification(user);
             resendCooldown = true;
             const btn = document.getElementById('btnResend');
-            btn.disabled  = true;
+            btn.disabled = true;
             let secs = 60;
             const interval = setInterval(() => {
                 btn.innerHTML = `<i class="bi bi-clock"></i> Kirim ulang dalam ${secs}s`;
@@ -787,18 +719,15 @@
             }, 1000);
             const alertEl = document.getElementById('verifyAlert');
             document.getElementById('verifyAlertMsg').textContent = 'Email verifikasi berhasil dikirim ulang!';
-            alertEl.className     = 'alert alert-success';
-            alertEl.style.display = 'flex';
+            alertEl.className = 'alert alert-success'; alertEl.style.display = 'flex';
             setTimeout(() => alertEl.style.display = 'none', 4000);
         } catch (err) {
             const alertEl = document.getElementById('verifyAlert');
             document.getElementById('verifyAlertMsg').textContent = `Gagal kirim ulang: ${err.message}`;
-            alertEl.className     = 'alert alert-danger';
-            alertEl.style.display = 'flex';
+            alertEl.className = 'alert alert-danger'; alertEl.style.display = 'flex';
         }
     });
 
-    // ── Toggle password ──
     document.getElementById('togglePassword').addEventListener('click', () => {
         const input = document.getElementById('password');
         const icon  = document.getElementById('eyeIcon1');

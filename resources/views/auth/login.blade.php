@@ -52,7 +52,6 @@
         @keyframes spin{to{transform:rotate(360deg);}}
         .field-error{font-size:.73rem;color:var(--danger);margin-top:.3rem;display:none;}
         .field-error.show{display:block;}
-        /* Resend link dalam alert */
         #resendLink{color:#92400e;font-weight:700;cursor:pointer;text-decoration:underline;}
         #resendLink:hover{color:#78350f;}
     </style>
@@ -93,7 +92,7 @@
             <span id="firebaseAlertMsg">Terjadi kesalahan.</span>
         </div>
 
-        {{-- ⚠️ Muncul jika email belum diverifikasi --}}
+        {{-- Muncul jika email belum diverifikasi --}}
         <div id="verifyWarning" class="alert alert-warning" style="display:none">
             <i class="bi bi-envelope-exclamation-fill"></i>
             <div>
@@ -147,12 +146,11 @@
 </div>
 
 <script type="module">
-    import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword,
-         signInWithPopup, signInWithRedirect, getRedirectResult,
-         GoogleAuthProvider,
-         sendEmailVerification }                from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, get, set }           from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+             signInWithPopup, GoogleAuthProvider,
+             sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
         apiKey:            "{{ env('FIREBASE_API_KEY') }}",
@@ -185,43 +183,20 @@
         text.style.display    = loading ? 'none'  : 'flex';
     }
 
-    // Ambil data user dari Firebase DB (role + email_verified)
-    async function getUserData(uid, email, displayName) {
-        const userRef = ref(db, `users/${uid}`);
-        const snap    = await get(userRef);
-        if (snap.exists()) {
-            return snap.val();
-        }
-        // User baru via Google (belum pernah register lewat halaman register)
-        const newUser = {
+    async function getOrCreateUserRole(uid, email, displayName) {
+        const snap = await get(ref(db, `users/${uid}`));
+        if (snap.exists()) return snap.val().role || 'viewer';
+        // Google user login pertama kali tanpa register → buat entry baru
+        await set(ref(db, `users/${uid}`), {
             email, display_name: displayName || email,
             role: 'viewer', email_verified: true,
             created_at: new Date().toISOString(),
-        };
-        await set(userRef, newUser);
-        return newUser;
+        });
+        return 'viewer';
     }
 
     async function storeSessionAndRedirect(user) {
-        const data = await getUserData(user.uid, user.email, user.displayName);
-
-        // Untuk user email/password: sync status verifikasi Firebase ke DB
-        // (saat user klik link verifikasi Firebase, DB belum terupdate)
-        if (!data.email_verified && user.emailVerified) {
-            const { update } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
-            await update(ref(db, `users/${user.uid}`), { email_verified: true });
-            data.email_verified = true;
-        }
-
-        // ✅ CEK email_verified dari DB (berlaku untuk semua jenis login, termasuk Google)
-        if (!data.email_verified) {
-            setLoading(false);
-            window._unverifiedUser = user;
-            document.getElementById('verifyWarning').style.display = 'flex';
-            return;
-        }
-
-        const role = data.role || 'viewer';
+        const role = await getOrCreateUserRole(user.uid, user.email, user.displayName);
         const res  = await fetch("{{ route('auth.session') }}", {
             method:  'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
@@ -267,9 +242,19 @@
         try {
             const cred = await signInWithEmailAndPassword(auth, email, password);
 
-            // Reload user lalu serahkan ke storeSessionAndRedirect yang akan cek DB
+            // Reload dari server Firebase agar emailVerified selalu fresh
             await cred.user.reload();
-            await storeSessionAndRedirect(auth.currentUser);
+            const user = auth.currentUser;
+
+            // Blokir login jika email belum diverifikasi
+            if (!user.emailVerified) {
+                setLoading(false);
+                window._unverifiedUser = user;
+                document.getElementById('verifyWarning').style.display = 'flex';
+                return;
+            }
+
+            await storeSessionAndRedirect(user);
 
         } catch (err) {
             setLoading(false);
@@ -277,53 +262,36 @@
                 'auth/user-not-found':         'Akun tidak ditemukan. Silakan daftar terlebih dahulu.',
                 'auth/wrong-password':         'Password salah. Coba lagi.',
                 'auth/invalid-email':          'Format email tidak valid.',
-                'auth/too-many-requests':      'Terlalu banyak percobaan. Coba lagi nanti.',
                 'auth/invalid-credential':     'Email atau password salah.',
+                'auth/too-many-requests':      'Terlalu banyak percobaan. Coba lagi nanti.',
                 'auth/network-request-failed': 'Koneksi gagal. Periksa internet Anda.',
             };
             showError(map[err.code] || `Error: ${err.message}`);
         }
     });
 
-    // ── Kirim ulang verifikasi dari halaman login ──
+    // ── Kirim ulang verifikasi ──
     document.getElementById('resendLink').addEventListener('click', async () => {
         const user = window._unverifiedUser;
         if (!user) return;
         try {
             await sendEmailVerification(user);
             document.getElementById('resendLink').textContent = '✓ Email terkirim! Cek inbox Anda.';
-            document.getElementById('resendLink').style.cursor = 'default';
+            document.getElementById('resendLink').style.pointerEvents = 'none';
         } catch (err) {
             document.getElementById('resendLink').textContent = 'Gagal kirim. Coba beberapa saat lagi.';
         }
     });
 
-    // ── Handle redirect result saat halaman dimuat ──
-    (async () => {
-        try {
-            const result = await getRedirectResult(auth);
-            console.log('Redirect result:', result);
-            if (result && result.user) {
-                await storeSessionAndRedirect(result.user);
-            }
-        } catch (err) {
-            console.error('Redirect error:', err);
-            showError(`Login Google gagal: ${err.message}`);
-        }
-    })();
-
     // ── Google Sign-In ──
     document.getElementById('btnGoogle').addEventListener('click', async () => {
         document.getElementById('firebaseAlert').style.display = 'none';
         try {
-            // Coba popup dulu
             const result = await signInWithPopup(auth, provider);
+            // Google user: emailVerified selalu true → langsung masuk
             await storeSessionAndRedirect(result.user);
         } catch (err) {
-            if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
-                // Fallback ke redirect
-                signInWithRedirect(auth, provider);
-            } else {
+            if (err.code !== 'auth/popup-closed-by-user') {
                 showError(`Login Google gagal: ${err.message}`);
             }
         }
