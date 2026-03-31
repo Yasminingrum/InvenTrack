@@ -68,7 +68,25 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle klik link verifikasi dari email.
+     * Handle continueUrl dari Firebase email verification (untuk user email/password).
+     * Firebase sudah verifikasi emailnya — kita tinggal sync email_verified: true ke DB.
+     */
+    public function verifyEmailSync(Request $request)
+    {
+        $uid = $request->query('uid');
+
+        if ($uid) {
+            $dbUrl = rtrim(env('FIREBASE_DATABASE_URL'), '/');
+            Http::patch("{$dbUrl}/users/{$uid}.json", [
+                'email_verified' => true,
+            ]);
+        }
+
+        return redirect()->route('login')->with('success', '✅ Email berhasil diverifikasi! Silakan login.');
+    }
+
+    /**
+     * Handle klik link verifikasi dari email (untuk Google user).
      * Validasi token, update email_verified: true di DB, redirect ke login.
      */
     public function verifyEmail(Request $request)

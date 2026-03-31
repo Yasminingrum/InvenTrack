@@ -403,7 +403,7 @@
 
 <script type="module">
     import { initializeApp }                         from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword,
+    import { getAuth, createUserWithEmailAndPassword, updateProfile,
          signInWithPopup, GoogleAuthProvider,
          sendEmailVerification }    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getDatabase, ref, set, get }             from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -655,7 +655,7 @@
             const cred = await createUserWithEmailAndPassword(auth, email, pwd);
             await updateProfile(cred.user, { displayName: name });
             await sendEmailVerification(cred.user, {
-                url: `${window.location.origin}/auth/email-verified`,
+                url: `${window.location.origin}/auth/verify-email-sync?uid=${cred.user.uid}`,
                 handleCodeInApp: false,
             });
             await saveUserToDb(cred.user.uid, email, name, role);
@@ -684,9 +684,19 @@
             const snap   = await get(ref(db, `users/${user.uid}`));
 
             if (snap.exists()) {
-                // User LAMA → langsung masuk
-                const role = snap.val().role || 'viewer';
-                await storeSessionAndRedirect(user.uid, user.email, user.displayName, role);
+                // User LAMA → simpan session dan redirect ke dashboard
+                const data = snap.val();
+                const role = data.role || 'viewer';
+                const res  = await fetch("{{ route('auth.session') }}", {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    body: JSON.stringify({ uid: user.uid, email: user.email, display_name: user.displayName || user.email, role }),
+                });
+                if (res.ok) {
+                    window.location.href = "{{ route('products.index') }}";
+                } else {
+                    showError('Gagal menyimpan sesi. Coba lagi.');
+                }
             } else {
                 // User BARU → tampilkan modal pilih role
                 _googleUser   = user;
@@ -723,11 +733,10 @@
 
         try {
             await saveUserToDb(_googleUser.uid, _googleUser.email, _googleUser.displayName, finalRole);
-            const ok = await sendVerificationEmail(_googleUser.uid, _googleUser.email, _googleUser.displayName);
-            if (!ok) throw new Error('Gagal kirim email');
+            await sendVerificationEmail(_googleUser.uid, _googleUser.email, _googleUser.displayName);
             showVerifyScreen(_googleUser.email);
         } catch (err) {
-            showError('Gagal menyimpan data atau mengirim email verifikasi. Coba lagi.');
+            showError(`Gagal: ${err.message}`);
             document.getElementById('btnModalOk').disabled = false;
             document.getElementById('roleModal').classList.add('open');
         }
