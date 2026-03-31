@@ -584,21 +584,17 @@
         });
     }
 
-    async function storeSessionAndRedirect(uid, email, displayName, role) {
-        const res = await fetch("{{ route('auth.session') }}", {
+    async function sendVerificationEmail(uid, email, name) {
+        const res = await fetch("{{ route('auth.send-verification') }}", {
             method:  'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept':       'application/json',
             },
-            body: JSON.stringify({ uid, email, display_name: displayName, role }),
+            body: JSON.stringify({ uid, email, name }),
         });
-        if (res.ok) {
-            window.location.href = "{{ route('products.index') }}";
-        } else {
-            showError('Gagal menyimpan sesi. Coba lagi.');
-        }
+        return res.ok;
     }
 
     // ── Password strength ──
@@ -727,9 +723,11 @@
 
         try {
             await saveUserToDb(_googleUser.uid, _googleUser.email, _googleUser.displayName, finalRole);
-            await storeSessionAndRedirect(_googleUser.uid, _googleUser.email, _googleUser.displayName, finalRole);
+            const ok = await sendVerificationEmail(_googleUser.uid, _googleUser.email, _googleUser.displayName);
+            if (!ok) throw new Error('Gagal kirim email');
+            showVerifyScreen(_googleUser.email);
         } catch (err) {
-            showError('Gagal menyimpan data. Coba lagi.');
+            showError('Gagal menyimpan data atau mengirim email verifikasi. Coba lagi.');
             document.getElementById('btnModalOk').disabled = false;
             document.getElementById('roleModal').classList.add('open');
         }

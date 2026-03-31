@@ -185,23 +185,43 @@
         text.style.display    = loading ? 'none'  : 'flex';
     }
 
-    async function getUserRole(uid, email, displayName) {
+    // Ambil data user dari Firebase DB (role + email_verified)
+    async function getUserData(uid, email, displayName) {
         const userRef = ref(db, `users/${uid}`);
         const snap    = await get(userRef);
         if (snap.exists()) {
-            return snap.val().role || 'viewer';
+            return snap.val();
         }
-        // User baru via Google tanpa register dulu
-        await set(userRef, {
+        // User baru via Google (belum pernah register lewat halaman register)
+        const newUser = {
             email, display_name: displayName || email,
             role: 'viewer', email_verified: true,
             created_at: new Date().toISOString(),
-        });
-        return 'viewer';
+        };
+        await set(userRef, newUser);
+        return newUser;
     }
 
     async function storeSessionAndRedirect(user) {
-        const role = await getUserRole(user.uid, user.email, user.displayName);
+        const data = await getUserData(user.uid, user.email, user.displayName);
+
+        // Untuk user email/password: sync status verifikasi Firebase ke DB
+        // (saat user klik link verifikasi Firebase, DB belum terupdate)
+        if (!data.email_verified && user.emailVerified) {
+            const { update } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+            await update(ref(db, `users/${user.uid}`), { email_verified: true });
+            data.email_verified = true;
+        }
+
+        // ✅ CEK email_verified dari DB (berlaku untuk semua jenis login, termasuk Google)
+        if (!data.email_verified) {
+            setLoading(false);
+            window._unverifiedUser = user;
+            document.getElementById('verifyWarning').style.display = 'flex';
+            return;
+        }
+
+        const role = data.role || 'viewer';
         const res  = await fetch("{{ route('auth.session') }}", {
             method:  'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
@@ -247,22 +267,9 @@
         try {
             const cred = await signInWithEmailAndPassword(auth, email, password);
 
-            // ✅ RELOAD user dari server Firebase agar emailVerified selalu fresh
-            // (bukan dari cached token yang bisa saja belum terupdate)
+            // Reload user lalu serahkan ke storeSessionAndRedirect yang akan cek DB
             await cred.user.reload();
-            const freshUser = auth.currentUser;
-
-            // ✅ CEK VERIFIKASI EMAIL
-            const isTestEmail = freshUser.email.endsWith('@inventrack.test');
-            if (!freshUser.emailVerified && !isTestEmail) {
-                setLoading(false);
-                // Simpan referensi user untuk tombol resend
-                window._unverifiedUser = freshUser;
-                document.getElementById('verifyWarning').style.display = 'flex';
-                return;
-            }
-
-            await storeSessionAndRedirect(freshUser);
+            await storeSessionAndRedirect(auth.currentUser);
 
         } catch (err) {
             setLoading(false);
