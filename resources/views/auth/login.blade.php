@@ -9,7 +9,7 @@
     <style>
         :root { --primary:#0f4c81;--primary-lt:#1a6bbf;--accent:#f97316;--surface:#f0f4f8;--card-bg:#ffffff;--border:#e2e8f0;--text-main:#0f172a;--text-muted:#64748b;--danger:#ef4444; }
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--surface);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--surface);min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow-x:hidden;padding:2rem 0;}
         body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 20% 20%,rgba(15,76,129,.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(249,115,22,.06) 0%,transparent 50%);pointer-events:none;}
         .bg-shapes{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
         .bg-shape{position:absolute;border-radius:50%;opacity:.07;}
@@ -247,17 +247,22 @@
         try {
             const cred = await signInWithEmailAndPassword(auth, email, password);
 
+            // ✅ RELOAD user dari server Firebase agar emailVerified selalu fresh
+            // (bukan dari cached token yang bisa saja belum terupdate)
+            await cred.user.reload();
+            const freshUser = auth.currentUser;
+
             // ✅ CEK VERIFIKASI EMAIL
-            const isTestEmail = cred.user.email.endsWith('@inventrack.test');
-            if (!cred.user.emailVerified && !isTestEmail) {
+            const isTestEmail = freshUser.email.endsWith('@inventrack.test');
+            if (!freshUser.emailVerified && !isTestEmail) {
                 setLoading(false);
                 // Simpan referensi user untuk tombol resend
-                window._unverifiedUser = cred.user;
+                window._unverifiedUser = freshUser;
                 document.getElementById('verifyWarning').style.display = 'flex';
                 return;
             }
 
-            await storeSessionAndRedirect(cred.user);
+            await storeSessionAndRedirect(freshUser);
 
         } catch (err) {
             setLoading(false);
