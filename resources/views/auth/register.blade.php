@@ -585,7 +585,7 @@
     }
 
     async function sendVerificationEmail(uid, email, name) {
-        const res = await fetch("{{ route('auth.send-verification') }}", {
+        const res  = await fetch("{{ route('auth.send-verification') }}", {
             method:  'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -594,7 +594,20 @@
             },
             body: JSON.stringify({ uid, email, name }),
         });
-        return res.ok;
+        if (!res.ok) {
+            const text = await res.text();
+            // Ambil pesan error dari JSON Laravel jika ada
+            let msg = `Server error ${res.status}`;
+            try {
+                const json = JSON.parse(text);
+                msg = json.message || json.error || msg;
+            } catch (_) {
+                // bukan JSON, tampilkan 300 karakter pertama
+                msg = text.substring(0, 300);
+            }
+            throw new Error(msg);
+        }
+        return true;
     }
 
     // ── Password strength ──
@@ -684,9 +697,8 @@
             const snap   = await get(ref(db, `users/${user.uid}`));
 
             if (snap.exists()) {
-                // User LAMA → simpan session dan redirect ke dashboard
-                const data = snap.val();
-                const role = data.role || 'viewer';
+                // User LAMA → simpan session dan masuk
+                const role = snap.val().role || 'viewer';
                 const res  = await fetch("{{ route('auth.session') }}", {
                     method:  'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
@@ -698,6 +710,7 @@
                     showError('Gagal menyimpan sesi. Coba lagi.');
                 }
             } else {
+
                 // User BARU → tampilkan modal pilih role
                 _googleUser   = user;
                 _selectedRole = 'viewer';
