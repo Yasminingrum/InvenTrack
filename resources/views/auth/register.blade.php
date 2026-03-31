@@ -658,7 +658,10 @@
             const role = getRoleFromCode(code) || 'viewer';
             const cred = await createUserWithEmailAndPassword(auth, email, pwd);
             await updateProfile(cred.user, { displayName: name });
-            await sendEmailVerification(cred.user);
+            await sendEmailVerification(cred.user, {
+                url: `${window.location.origin}/auth/email-verified`,
+                handleCodeInApp: false,
+            });
             await saveUserToDb(cred.user.uid, email, name, role);
             setLoading(false);
             showVerifyScreen(email);

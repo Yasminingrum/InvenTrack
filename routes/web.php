@@ -22,6 +22,9 @@ Route::middleware('guest.firebase')->group(function () {
 Route::post('/auth/session', [AuthController::class, 'storeSession'])->name('auth.session');
 Route::post('/logout',       [AuthController::class, 'logout'])->name('logout');
 
+// ── Email verification redirect (Firebase continueUrl target) ──
+Route::get('/auth/email-verified', [AuthController::class, 'emailVerified'])->name('auth.email-verified');
+
 // ══════════════════════════════════════════════
 // PROTECTED ROUTES
 // ══════════════════════════════════════════════

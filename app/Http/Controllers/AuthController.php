@@ -27,6 +27,18 @@ class AuthController extends Controller
         return redirect()->route('login')->with('success', 'Anda telah berhasil logout.');
     }
 
+     /**
+     * Target continueUrl setelah user klik link verifikasi email dari Firebase.
+     * Firebase redirect ke sini setelah email berhasil diverifikasi.
+     */
+    public function emailVerified(Request $request)
+    {
+        return redirect()->route('login')->with(
+            'success',
+            '✅ Email berhasil diverifikasi! Silakan login untuk melanjutkan.'
+        );
+    }
+
     /**
      * Simpan session setelah Firebase Auth berhasil di frontend.
      * Sekarang menerima 'role' dari frontend (dibaca dari Firebase DB).
