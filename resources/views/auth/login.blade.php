@@ -150,7 +150,7 @@
     import { getAuth, signInWithEmailAndPassword,
              signInWithPopup, GoogleAuthProvider,
              sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
         apiKey:            "{{ env('FIREBASE_API_KEY') }}",
@@ -183,20 +183,18 @@
         text.style.display    = loading ? 'none'  : 'flex';
     }
 
-    async function getOrCreateUserRole(uid, email, displayName) {
-        const snap = await get(ref(db, `users/${uid}`));
-        if (snap.exists()) return snap.val().role || 'viewer';
-        // Google user login pertama kali tanpa register → buat entry baru
-        await set(ref(db, `users/${uid}`), {
-            email, display_name: displayName || email,
-            role: 'viewer', email_verified: true,
-            created_at: new Date().toISOString(),
-        });
-        return 'viewer';
-    }
-
     async function storeSessionAndRedirect(user) {
-        const role = await getOrCreateUserRole(user.uid, user.email, user.displayName);
+        const snap = await get(ref(db, `users/${user.uid}`));
+
+        // Tolak login jika belum registrasi
+        if (!snap.exists()) {
+            await user.delete().catch(() => {});  // hapus akun Firebase yang baru dibuat saat popup
+            showError('Akun Google ini belum terdaftar. Silakan daftar terlebih dahulu.');
+            setLoading(false);
+            return;
+        }
+
+        const role = snap.val().role || 'viewer';
         const res  = await fetch("{{ route('auth.session') }}", {
             method:  'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
