@@ -17,11 +17,13 @@ Route::get('/', function () {
 Route::middleware('guest.firebase')->group(function () {
     Route::get('/login',    [AuthController::class, 'loginPage'])->name('login');
     Route::get('/register', [AuthController::class, 'registerPage'])->name('register');
-    Route::get('/auth/action', fn() => view('auth.action'))->name('auth.action');
 });
 
 Route::post('/auth/session', [AuthController::class, 'storeSession'])->name('auth.session');
 Route::post('/logout',       [AuthController::class, 'logout'])->name('logout');
+
+// ── Firebase Email Action Handler (tanpa middleware, bisa diakses siapapun) ──
+Route::get('/auth/action', fn() => view('auth.action'))->name('auth.action');
 
 // ══════════════════════════════════════════════
 // PROTECTED ROUTES
