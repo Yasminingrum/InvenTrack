@@ -2,6 +2,8 @@
 
 Aplikasi **manajemen inventaris toko** berbasis **Laravel** yang menggunakan **Firebase Realtime Database** sebagai backend (BaaS). Dibuat untuk memenuhi tugas implementasi BaaS menggunakan Firebase.
 
+Versi online dapat diakses pada link: https://inventrack.up.railway.app/
+
 ---
 
 ## 📋 Fitur Aplikasi

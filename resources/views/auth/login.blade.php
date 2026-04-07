@@ -305,7 +305,9 @@
 
         // ── Tampilkan pesan sukses jika redirect dari verifikasi email ──
     if (new URLSearchParams(window.location.search).get('verified') === '1') {
-        document.getElementById('firebaseAlert').style.display = 'none';
+        document.getElementById('firebaseAlert').style.display  = 'none';
+        document.getElementById('verifyWarning').style.display  = 'none';
+        window._unverifiedUser = null;
         const el = document.createElement('div');
         el.className = 'alert alert-success';
         el.innerHTML = '<i class="bi bi-check-circle-fill"></i> Email berhasil diverifikasi! Silakan login.';
