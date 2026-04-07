@@ -240,8 +240,9 @@
         try {
             const cred = await signInWithEmailAndPassword(auth, email, password);
 
-            // Reload dari server Firebase agar emailVerified selalu fresh
+            // Reload + force token refresh agar emailVerified selalu fresh dari server
             await cred.user.reload();
+            await cred.user.getIdToken(true); // paksa Firebase ambil token baru
             const user = auth.currentUser;
 
             // Blokir login jika email belum diverifikasi
