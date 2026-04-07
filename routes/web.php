@@ -23,7 +23,7 @@ Route::post('/auth/session', [AuthController::class, 'storeSession'])->name('aut
 Route::post('/logout',       [AuthController::class, 'logout'])->name('logout');
 
 // ── Firebase Email Action Handler (tanpa middleware, bisa diakses siapapun) ──
-Route::get('/auth/action', fn() => view('auth.action'))->name('auth.action');
+Route::get('/verify-email', fn() => view('auth.action'))->name('auth.action');
 
 // ══════════════════════════════════════════════
 // PROTECTED ROUTES
