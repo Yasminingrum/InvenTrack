@@ -6,6 +6,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\ReportController;
 
+
+Route::get('/test-route', fn() => 'OK - Laravel is working');
+
 // ── Root redirect ──
 Route::get('/', function () {
     return redirect()->route('products.index');
